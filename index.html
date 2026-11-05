@@ -1,2 +1,42 @@
-<!doctype html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pide Tu Tema</title><link rel="stylesheet" href="styles.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><div class="glow"></div><main><header><div><small>● FIESTA EN VIVO</small><h1>🎧 Pide Tu Tema</h1><p>Tú eliges. Luis DJ mezcla. Todos bailan.</p></div><nav><button data-view="guest" class="active">📱 Invitado</button><button id="djNav" data-view="dj">🎛️ DJ</button></nav></header><section id="guest" class="grid"><form id="requestForm" class="card"><span class="pill">CUMPLE DE CAROLINA 🎂</span><h2>¿Qué quieres bailar?</h2><p>Pide tu canción o vota una que ya esté en la lista.</p><label>Canción *</label><input id="title" required placeholder="Ej: Mentirosa"><label>Artista</label><input id="artist" placeholder="Ej: Ráfaga"><div class="two"><input id="requester" placeholder="Nombre o mesa"><input id="message" placeholder="Dedicatoria 💜"></div><button class="primary">🚀 PEDIR CANCIÓN</button><div id="notice"></div></form><div class="card"><small>RANKING EN VIVO</small><h2>🔥 Lo que pide la fiesta</h2><div id="ranking"></div></div></section><section id="dj" hidden><div id="djIdentity" class="dj-identity"></div><div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div><div class="card"><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2><div id="djList"></div></div></section><footer>Escanea · Pide · Vota · Baila ✨</footer></main>
-<div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p>Inicia sesión con tu cuenta de Supabase.</p><label>Correo</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="dj@correo.cl"><label>Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required placeholder="••••••••"><button id="loginButton" class="primary">ENTRAR AL PANEL</button><div id="loginNotice" role="alert"></div></form></div><script src="config.js"></script><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6d28d9">
+  <title>Pide Tu Tema | Luis DJ</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="ambient one"></div><div class="ambient two"></div>
+  <main class="shell">
+    <header class="hero">
+      <div><span class="live">● FIESTA EN VIVO</span><h1>🎧 Pide Tu Tema</h1><p>Tú eliges. Luis DJ mezcla. Todos bailan.</p></div>
+      <nav aria-label="Vistas"><button data-view="guest" class="tab active">📱 Invitados</button><button id="djNav" class="tab">🎛️ Panel DJ</button></nav>
+    </header>
+
+    <section id="guest" class="guest-grid">
+      <form id="requestForm" class="card form-card">
+        <span id="eventName" class="pill">TU FIESTA ✨</span>
+        <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
+        <label for="title">Canción *</label><input id="title" maxlength="120" required placeholder="Ej: Mentirosa" autocomplete="off">
+        <label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Ej: Ráfaga" autocomplete="off">
+        <div class="two"><div><label for="requester">Tu nombre o mesa</label><input id="requester" maxlength="80" placeholder="Ej: Carolina · Mesa 4"></div><div><label for="message">Dedicatoria</label><input id="message" maxlength="240" placeholder="Un saludo para... 💜"></div></div>
+        <button id="sendButton" class="primary" type="submit">🚀 PEDIR CANCIÓN</button><div id="notice" class="notice" role="status"></div>
+      </form>
+      <div class="card ranking-card"><div class="section-head"><div><small>RANKING EN VIVO</small><h2>🔥 Lo que pide la fiesta</h2></div><button id="refreshButton" class="icon-button" aria-label="Actualizar">↻</button></div><div id="ranking" class="song-list"></div></div>
+    </section>
+
+    <section id="dj" hidden>
+      <div id="djIdentity" class="dj-identity"></div>
+      <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
+      <div class="card"><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2><div id="djList" class="song-list"></div></div>
+    </section>
+    <footer>Escanea · Pide · Vota · Baila ✨</footer>
+  </main>
+
+  <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close" aria-label="Cerrar">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con el usuario creado en Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
+  <script src="config.js"></script><script src="app.js"></script>
+</body></html>
