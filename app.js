@@ -1,53 +1,24 @@
-const cfg=window.APP_CONFIG;
-const configured=!cfg.SUPABASE_URL.startsWith('TU_');
-const db=configured?supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
-let demo=[{id:'1',title:'Mentirosa',artist:'Ráfaga',requester_name:'Carolina · Mesa 4',votes:18,status:'pending'},{id:'2',title:'Vino y Cerveza',artist:'Amar Azul',requester_name:'Mesa 7',votes:14,status:'accepted'}];
+use strict';
+const cfg=window.APP_CONFIG||{};
+const configured=/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(cfg.SUPABASE_URL||'')&&!String(cfg.SUPABASE_PUBLISHABLE_KEY||'').startsWith('TU_');
+const db=configured?supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+const $=id=>document.getElementById(id); const el={guest:$('guest'),dj:$('dj'),djNav:$('djNav'),loginModal:$('loginModal'),loginForm:$('loginForm'),loginEmail:$('loginEmail'),loginPassword:$('loginPassword'),loginButton:$('loginButton'),loginNotice:$('loginNotice'),closeLogin:$('closeLogin'),requestForm:$('requestForm'),title:$('title'),artist:$('artist'),requester:$('requester'),message:$('message'),sendButton:$('sendButton'),notice:$('notice'),ranking:$('ranking'),djList:$('djList'),eventName:$('eventName'),djIdentity:$('djIdentity'),nRequests:$('nRequests'),nVotes:$('nVotes'),nQueue:$('nQueue'),refreshButton:$('refreshButton')};
 const labels={pending:'Pendiente',accepted:'En lista',next:'Próxima',playing:'Sonando',played:'Reproducida',rejected:'Cerrada'};
-let eventId=null, rows=[], session=null, channel=null;
-
-const showGuest=()=>{guest.hidden=false;dj.hidden=true;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view==='guest'))};
-async function openDj(){
- if(!configured){loginNotice.textContent='Configura Supabase en config.js antes de acceder.';loginModal.hidden=false;return}
- const {data}=await db.auth.getSession(); session=data.session;
- if(!session){loginModal.hidden=false;setTimeout(()=>loginEmail.focus(),50);return}
- guest.hidden=true;dj.hidden=false;loginModal.hidden=true;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x.dataset.view==='dj'));
- djIdentity.innerHTML=`<span>Sesión: ${esc(session.user.email)}</span><button class="logout" id="logoutBtn">Salir</button>`;
- document.getElementById('logoutBtn').onclick=logout; await load();
-}
-document.querySelector('[data-view="guest"]').onclick=showGuest;
-djNav.onclick=openDj; closeLogin.onclick=()=>loginModal.hidden=true;
-loginModal.onclick=e=>{if(e.target===loginModal)loginModal.hidden=true};
-loginForm.onsubmit=async e=>{
- e.preventDefault(); loginButton.disabled=true; loginNotice.textContent='Validando acceso…';
- const {data,error}=await db.auth.signInWithPassword({email:loginEmail.value.trim(),password:loginPassword.value});
- loginButton.disabled=false;
- if(error){loginNotice.textContent='Correo o contraseña incorrectos.';return}
- session=data.session; loginForm.reset(); loginNotice.textContent=''; await openDj();
-};
-async function logout(){if(db)await db.auth.signOut();session=null;showGuest();djIdentity.textContent='';}
-if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});
-
-async function load(){
- if(!db){rows=demo;render();return}
- const {data:e,error}=await db.from('events').select('id').eq('slug',cfg.EVENT_SLUG).eq('is_active',true).single();
- if(error){notice.textContent='Evento no disponible.';return}
- eventId=e.id;
- const {data,error:reqError}=await db.from('song_requests').select('*').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false});
- if(reqError){notice.textContent='No se pudieron cargar los pedidos.';return}
- rows=data||[];render();
- if(channel)await db.removeChannel(channel);
- channel=db.channel('requests-'+eventId).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:'event_id=eq.'+eventId},()=>refreshRows()).subscribe();
-}
-async function refreshRows(){if(!db||!eventId)return;const {data}=await db.from('song_requests').select('*').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false});rows=data||[];render()}
-function songHTML(x,i,djMode=false){return `<div class="song"><div class="rank">${i+1}</div><div class="song-info"><b>${esc(x.title)}</b><div class="meta">${esc(x.artist||'Artista por confirmar')} · ${esc(x.requester_name||'Invitado')}</div><div class="state">${labels[x.status]||x.status}</div></div>${djMode?`<div class="actions"><button class="action accept" onclick="setStatus('${x.id}','accepted')">Aceptar</button><button class="action next" onclick="setStatus('${x.id}','next')">Próxima</button><button class="action play" onclick="setStatus('${x.id}','playing')">Sonando</button><button class="action close" onclick="setStatus('${x.id}','rejected')">Cerrar</button></div>`:`<button class="vote" onclick="vote('${x.id}')">♥ ${x.votes}</button>`}</div>`}
-function render(){rows.sort((a,b)=>b.votes-a.votes);ranking.innerHTML=rows.map((x,i)=>songHTML(x,i)).join('');djList.innerHTML=rows.map((x,i)=>songHTML(x,i,true)).join('');nRequests.textContent=rows.length;nVotes.textContent=rows.reduce((a,x)=>a+x.votes,0);nQueue.textContent=rows.filter(x=>['accepted','next','playing'].includes(x.status)).length}
-requestForm.onsubmit=async e=>{e.preventDefault();const row={event_id:eventId,title:title.value.trim(),artist:artist.value.trim(),requester_name:requester.value.trim(),message:message.value.trim(),votes:1,status:'pending'};if(!row.title)return;if(db){if(!eventId)await load();row.event_id=eventId;const {error}=await db.from('song_requests').insert(row);if(error)return notice.textContent='No se pudo enviar el pedido.'}else{row.id=Date.now().toString();demo.unshift(row);rows=demo;render()}requestForm.reset();notice.textContent='¡Pedido enviado al DJ! 🎉'};
-async function vote(id){const x=rows.find(r=>r.id==id);if(!x)return;if(db){const {error}=await db.rpc('vote_song',{request_id:id});if(error)notice.textContent='No se pudo registrar el voto.'}else{x.votes++;render()}}
-async function setStatus(id,status){
- if(!db||!session){loginModal.hidden=false;return}
- const {error}=await db.from('song_requests').update({status}).eq('id',id);
- if(error){alert('No autorizado para modificar este pedido.');return}
- await refreshRows();
-}
+let eventId=null,rows=[],session=null,channel=null;
+const voterToken=localStorage.getItem('pide_tu_tema_voter')||crypto.randomUUID(); localStorage.setItem('pide_tu_tema_voter',voterToken);
+function setNotice(text,error=false){el.notice.textContent=text;el.notice.style.color=error?'#fecdd3':'#a7f3d0'}
+function showGuest(){el.guest.hidden=false;el.dj.hidden=true;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view==='guest'))}
+async function openDj(){if(!configured){el.loginNotice.textContent='Completa config.js con Project URL y Publishable key.';el.loginModal.hidden=false;return}const {data}=await db.auth.getSession();session=data.session;if(!session){el.loginModal.hidden=false;setTimeout(()=>el.loginEmail.focus(),50);return}el.guest.hidden=true;el.dj.hidden=false;el.loginModal.hidden=true;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===el.djNav));el.djIdentity.innerHTML=`<span>Sesión: ${esc(session.user.email)}</span><button class="logout" id="logoutBtn">Salir</button>`;$('logoutBtn').onclick=logout;await load()}
+async function logout(){await db?.auth.signOut();session=null;showGuest();el.djIdentity.textContent=''}
+async function load(){if(!db){setNotice('Falta configurar Supabase en config.js.',true);render();return}const {data:e,error}=await db.from('events').select('id,name').eq('slug',cfg.EVENT_SLUG).eq('is_active',true).maybeSingle();if(error||!e){setNotice('Evento no disponible. Revisa el slug y que esté activo.',true);return}eventId=e.id;el.eventName.textContent=e.name.toUpperCase()+' ✨';await refreshRows();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:requests`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},refreshRows).subscribe()}
+async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);return}rows=data||[];render()}
+function songHTML(x,i,djMode=false){const actions=`<div class="actions"><button class="action" data-status="accepted" data-id="${x.id}">Aceptar</button><button class="action" data-status="next" data-id="${x.id}">Próxima</button><button class="action play" data-status="playing" data-id="${x.id}">Sonando</button><button class="action" data-status="played" data-id="${x.id}">Lista</button><button class="action close" data-status="rejected" data-id="${x.id}">Cerrar</button></div>`;return `<article class="song"><div class="rank">${i+1}</div><div class="song-info"><b>${esc(x.title)}</b><div class="meta">${esc(x.artist||'Artista por confirmar')} · ${esc(x.requester_name||'Invitado')}</div><span class="state">${labels[x.status]||x.status}</span></div>${djMode?actions:`<button class="vote" data-vote="${x.id}" aria-label="Votar por ${esc(x.title)}">♥ ${x.votes}</button>`}</article>`}
+function render(){const visible=rows.filter(x=>x.status!=='played');const empty='<div class="empty">Aún no hay canciones. ¡Sé el primero en pedir! 🎶</div>';el.ranking.innerHTML=visible.length?visible.map((x,i)=>songHTML(x,i)).join(''):empty;el.djList.innerHTML=rows.length?rows.map((x,i)=>songHTML(x,i,true)).join(''):empty;el.nRequests.textContent=rows.length;el.nVotes.textContent=rows.reduce((a,x)=>a+x.votes,0);el.nQueue.textContent=rows.filter(x=>['accepted','next','playing'].includes(x.status)).length}
+async function vote(id,button){button.disabled=true;const {error}=await db.rpc('vote_song',{request_id:id,voter_token:voterToken});button.disabled=false;if(error){setNotice(error.message.includes('duplicate')?'Ya votaste por esta canción. 💜':'No se pudo registrar el voto.',true)}else{setNotice('¡Voto registrado! 💜');await refreshRows()}}
+async function setStatus(id,status){if(!session){el.loginModal.hidden=false;return}const {error}=await db.from('song_requests').update({status}).eq('id',id);if(error)alert('No autorizado para modificar este pedido.');else await refreshRows()}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-load();
+el.requestForm.addEventListener('submit',async e=>{e.preventDefault();if(!db||!eventId){setNotice('El evento todavía no está disponible.',true);return}el.sendButton.disabled=true;const payload={event_id:eventId,title:el.title.value.trim(),artist:el.artist.value.trim()||null,requester_name:el.requester.value.trim()||null,message:el.message.value.trim()||null};const {error}=await db.rpc('create_song_request',payload);el.sendButton.disabled=false;if(error){setNotice(error.message.includes('duplicate')?'Esa canción ya está en la lista. Mejor dale un corazón. ❤️':'No se pudo enviar el pedido.',true);return}el.requestForm.reset();setNotice('¡Pedido enviado al DJ! 🎉');await refreshRows()});
+el.ranking.addEventListener('click',e=>{const b=e.target.closest('[data-vote]');if(b)vote(b.dataset.vote,b)});el.djList.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(b)setStatus(b.dataset.id,b.dataset.status)});
+document.querySelector('[data-view="guest"]').onclick=showGuest;el.djNav.onclick=openDj;el.closeLogin.onclick=()=>el.loginModal.hidden=true;el.loginModal.onclick=e=>{if(e.target===el.loginModal)el.loginModal.hidden=true};el.refreshButton.onclick=refreshRows;
+el.loginForm.onsubmit=async e=>{e.preventDefault();el.loginButton.disabled=true;el.loginNotice.textContent='Validando acceso…';const {data,error}=await db.auth.signInWithPassword({email:el.loginEmail.value.trim(),password:el.loginPassword.value});el.loginButton.disabled=false;if(error){el.loginNotice.textContent='Correo o contraseña incorrectos.';return}session=data.session;el.loginForm.reset();el.loginNotice.textContent='';await openDj()};
+if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});load();
