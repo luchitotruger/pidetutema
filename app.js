@@ -1,4 +1,4 @@
-use strict';
+'use strict';
 const cfg=window.APP_CONFIG||{};
 const configured=/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(cfg.SUPABASE_URL||'')&&!String(cfg.SUPABASE_PUBLISHABLE_KEY||'').startsWith('TU_');
 const db=configured?supabase.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
