@@ -21,5 +21,4 @@ el.requestForm.addEventListener('submit',async e=>{e.preventDefault();if(!db||!e
 el.ranking.addEventListener('click',e=>{const b=e.target.closest('[data-vote]');if(b)vote(b.dataset.vote,b)});el.djList.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(b)setStatus(b.dataset.id,b.dataset.status)});
 document.querySelector('[data-view="guest"]').onclick=showGuest;el.djNav.onclick=openDj;el.closeLogin.onclick=()=>el.loginModal.hidden=true;el.loginModal.onclick=e=>{if(e.target===el.loginModal)el.loginModal.hidden=true};el.refreshButton.onclick=refreshRows;
 el.loginForm.onsubmit=async e=>{e.preventDefault();el.loginButton.disabled=true;el.loginNotice.textContent='Validando acceso…';const {data,error}=await db.auth.signInWithPassword({email:el.loginEmail.value.trim(),password:el.loginPassword.value});el.loginButton.disabled=false;if(error){el.loginNotice.textContent='Correo o contraseña incorrectos.';return}session=data.session;el.loginForm.reset();el.loginNotice.textContent='';await openDj()};
-if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});
-load();
+if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});load();
