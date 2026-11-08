@@ -21,4 +21,59 @@ el.requestForm.addEventListener('submit',async e=>{e.preventDefault();if(!db||!e
 el.ranking.addEventListener('click',e=>{const b=e.target.closest('[data-vote]');if(b)vote(b.dataset.vote,b)});el.djList.addEventListener('click',e=>{const b=e.target.closest('[data-status]');if(b)setStatus(b.dataset.id,b.dataset.status)});
 document.querySelector('[data-view="guest"]').onclick=showGuest;el.djNav.onclick=openDj;el.closeLogin.onclick=()=>el.loginModal.hidden=true;el.loginModal.onclick=e=>{if(e.target===el.loginModal)el.loginModal.hidden=true};el.refreshButton.onclick=refreshRows;
 el.loginForm.onsubmit=async e=>{e.preventDefault();el.loginButton.disabled=true;el.loginNotice.textContent='Validando acceso…';const {data,error}=await db.auth.signInWithPassword({email:el.loginEmail.value.trim(),password:el.loginPassword.value});el.loginButton.disabled=false;if(error){el.loginNotice.textContent='Correo o contraseña incorrectos.';return}session=data.session;el.loginForm.reset();el.loginNotice.textContent='';await openDj()};
-if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});load();
+if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});
+// ==========================================
+// 🎵 BUSCADOR INTELIGENTE INTEGRADO (iTUNES API)
+// ==========================================
+async function buscarEniTunes(query) {
+  if (query.length  {
+    clearTimeout(temporizadorBusqueda);
+    const texto = e.target.value.trim();
+
+    if (texto.length < 3) {
+      listaSugerencias.style.display = 'none';
+      return;
+    }
+
+    temporizadorBusqueda = setTimeout(async () => {
+      const canciones = await buscarEniTunes(texto);
+      
+      if (canciones.length === 0) {
+        listaSugerencias.style.display = 'none';
+        return;
+      }
+
+      listaSugerencias.innerHTML = canciones.map(track => `
+        <div class="itunes-item" data-title="${esc(track.trackName)}" data-artist="${esc(track.artistName)}" style="display:flex; align-items:center; gap:12px; padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05);">
+          <img src="${track.artworkUrl60}" style="width:40px; height:40px; border-radius:6px;" alt="Portada">
+          <div style="flex:1; min-width:0; text-align:left;">
+            <b style="display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#fff;">${esc(track.trackName)}</b>
+            <span style="font-size:0.8rem; color:var(--muted); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${esc(track.artistName)}</span>
+          </div>
+        </div>
+      `).join('');
+
+      listaSugerencias.style.display = 'block';
+    }, 300);
+  });
+
+  listaSugerencias.addEventListener('click', (e) => {
+    const item = e.target.closest('.itunes-item');
+    if (item) {
+      el.title.value = item.dataset.title;
+      el.artist.value = item.dataset.artist;
+      listaSugerencias.style.display = 'none';
+      if (el.requester) el.requester.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (e.target !== el.title && e.target !== listaSugerencias) {
+      listaSugerencias.style.display = 'none';
+    }
+  });
+}
+
+
+
+load();
