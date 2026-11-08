@@ -1,186 +1,42 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pide Tu Tema 🎶</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#6d28d9">
+  <title>Pide Tu Tema | Luis DJ</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-  <!-- Efectos de Luces Ambientales de Fondo -->
-  <div class="ambient one"></div>
-  <div class="ambient two"></div>
-
-  <div class="shell">
-    
-    <!-- Cabecera Principal y Navegación de Pestañas -->
+  <div class="ambient one"></div><div class="ambient two"></div>
+  <main class="shell">
     <header class="hero">
-      <div>
-        <span class="live">• EN VIVO DESDE LA CABINA</span>
-        <h1 id="eventName">PIDE TU TEMA</h1>
-        <p class="muted">Elige tus canciones favoritas y vota para que el DJ las toque.</p>
-      </div>
-      <nav>
-        <button class="tab active" data-view="guest">🎵 Invitados</button>
-        <button class="tab" data-view="tv" id="tvNav">📺 Modo Pantalla</button>
-        <button class="tab" data-view="dj" id="djNav">🎧 Panel DJ</button>
-      </nav>
+      <div><span class="live">● FIESTA EN VIVO</span><h1>🎧 Pide Tu Tema</h1><p>Tú eliges. Luis DJ mezcla. Todos bailan.</p></div>
+      <nav aria-label="Vistas"><button data-view="guest" class="tab active">📱 Invitados</button><button id="djNav" class="tab">🎛️ Panel DJ</button></nav>
     </header>
 
-    <main>
-      <!-- ======================================================= -->
-      <!-- CONTENEDOR 1: VISTA DE INVITADOS                        -->
-      <!-- ======================================================= -->
-      <div id="guest">
-        <div class="guest-grid">
-          
-          <!-- Columna Izquierda: Formulario para solicitar tema -->
-          <section class="card form-card">
-            <span class="pill">NUEVA PETICIÓN</span>
-            <h2>¿Qué canción quieres escuchar?</h2>
-            <form id="requestForm">
-              <label for="title">Canción *</label>
-              <input type="text" id="title" placeholder="Ej: Thriller, Billie Jean..." required autocomplete="off">
-              
-              <div class="two">
-                <div>
-                  <label for="artist">Artista (Opcional)</label>
-                  <input type="text" id="artist" placeholder="Ej: Michael Jackson...">
-                </div>
-                <div>
-                  <label for="requester">Tu Nombre (Opcional)</label>
-                  <input type="text" id="requester" placeholder="Ej: Carlos...">
-                </div>
-              </div>
+    <section id="guest" class="guest-grid">
+      <form id="requestForm" class="card form-card">
+        <span id="eventName" class="pill">TU FIESTA ✨</span>
+        <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
+        <label for="title">Canción *</label><input id="title" maxlength="120" required placeholder="Ej: Mentirosa" autocomplete="off">
+        <label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Ej: Ráfaga" autocomplete="off">
+        <div class="two"><div><label for="requester">Tu nombre o mesa</label><input id="requester" maxlength="80" placeholder="Ej: Carolina · Mesa 4"></div><div><label for="message">Dedicatoria</label><input id="message" maxlength="240" placeholder="Un saludo para... 💜"></div></div>
+        <button id="sendButton" class="primary" type="submit">🚀 PEDIR CANCIÓN</button><div id="notice" class="notice" role="status"></div>
+      </form>
+      <div class="card ranking-card"><div class="section-head"><div><small>RANKING EN VIVO</small><h2>🔥 Lo que pide la fiesta</h2></div><button id="refreshButton" class="icon-button" aria-label="Actualizar">↻</button></div><div id="ranking" class="song-list"></div></div>
+    </section>
 
-              <label for="message">Mensaje para el DJ (Opcional)</label>
-              <input type="text" id="message" placeholder="Ej: ¡Dedícala a la cumpleañera! 🎉">
+    <section id="dj" hidden>
+      <div id="djIdentity" class="dj-identity"></div>
+      <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
+      <div class="card"><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2><div id="djList" class="song-list"></div></div>
+    </section>
+    <footer>Escanea · Pide · Vota · Baila ✨</footer>
+  </main>
 
-              <button type="submit" class="primary" id="sendButton">Enviar Pedido a la Lista</button>
-              <div class="notice" id="notice"></div>
-            </form>
-          </section>
-
-          <!-- Columna Derecha: Ranking en tiempo real para votaciones -->
-          <section>
-            <div class="section-head" style="margin-bottom: 14px;">
-              <h2>🔥 Lista de Pedidos</h2>
-              <button class="icon-button" id="refreshButton" title="Actualizar lista">🔄</button>
-            </div>
-            <div class="song-list" id="ranking">
-              <!-- Se renderiza dinámicamente desde app.js -->
-            </div>
-          </section>
-
-        </div>
-      </div>
-
-      <!-- ======================================================= -->
-      <!-- CONTENEDOR 2: VISTA DE PANTALLA GIGANTE (TV)            -->
-      <!-- ======================================================= -->
-      <div id="tv" hidden style="max-width: 1200px; margin: auto; padding: 20px 0;">
-        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 40px; align-items: start;">
-          
-          <!-- Lado Izquierdo: Canción actual y TOP 5 musical -->
-          <div>
-            <div id="tv-playing-container"></div>
-            <h2 style="font-size: 2.2rem; margin-bottom: 20px; background: linear-gradient(90deg, #22d3ee, #8b5cf6); -webkit-background-clip: text; color: transparent;">🔥 LO MÁS VOTADO</h2>
-            <div id="tv-ranking" style="display: grid; gap: 15px;"></div>
-          </div>
-          
-          <!-- Lado Derecho: Instrucciones y código QR de la fiesta -->
-          <div class="card" style="text-align: center; padding: 40px 20px; position: sticky; top: 20px; border-color: var(--pink); background: rgba(25, 15, 48, 0.95);">
-            <span class="pill" style="font-size: 1rem; padding: 8px 16px; margin-bottom: 20px;">🎶 PIDE TU TEMA EN VIVO</span>
-            <h3 style="font-size: 2.5rem; margin: 20px 0 10px; line-height: 1.2;">¿Quieres escuchar tu canción?</h3>
-            <p style="color: var(--muted); font-size: 1.3rem; margin-bottom: 30px;">Escanea el código QR del salón o ingresa desde tu celular:</p>
-            
-            <!-- Recuadro Blanco para colocar tu Código QR real -->
-            <div id="tv-qr" style="width: 220px; height: 220px; background: white; margin: 0 auto 30px; padding: 10px; border-radius: 16px; display: grid; place-items: center; box-shadow: 0 0 30px rgba(236, 72, 153, 0.4);">
-              <div style="color: #000; font-weight: bold; font-size: 0.9rem; text-align: center;">[ CÓDIGO QR<br>DE TU FIESTA ]</div>
-            </div>
-            
-            <div style="font-size: 1.5rem; font-weight: bold; letter-spacing: 1px; color: var(--cyan);">
-              EVENTO: <span id="tv-slug-display" style="color: #fff; text-transform: uppercase; background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 8px;"></span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ======================================================= -->
-      <!-- CONTENEDOR 3: VISTA DE CONTROL DEL DJ                    -->
-      <!-- ======================================================= -->
-      <div id="dj" hidden>
-        
-        <!-- Bloque de estadísticas superiores -->
-        <section class="stats">
-          <div class="card">
-            <b id="nRequests">0</b>
-            <span>Pedidos Totales</span>
-          </div>
-          <div class="card">
-            <b id="nVotes">0</b>
-            <span>Votos Acumulados</span>
-          </div>
-          <div class="card">
-            <b id="nQueue">0</b>
-            <span>En Cola de Reproducción</span>
-          </div>
-        </section>
-
-        <!-- Barra de Búsqueda y Filtrado Rápido en Tiempo Real -->
-        <div class="card form-card" style="margin-bottom: 16px; padding: 14px 20px;">
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <span style="font-size: 1.2rem;">🔍</span>
-            <input type="text" id="djSearch" placeholder="Buscar por canción, artista o invitado..." style="margin: 0; padding: 10px 14px;">
-          </div>
-        </div>
-
-        <!-- Lista Principal del Panel DJ -->
-        <section class="card">
-          
-            <span>Validando identidad...</span></div>
-          </div>
-          <div class="song-list" id="djList">
-            <!-- Se renderiza dinámicamente desde app.js -->
-          </div>
-        </section>
-
-      </div>
-    </main>
-
-    <!-- Ventana Modal de Inicio de Sesión para el DJ -->
-    <div class="modal" id="loginModal" hidden>
-      <div class="login-card">
-        <button class="modal-close" id="closeLogin">&times;</button>
-        <div style="text-align: center; margin-bottom: 18px;">
-          <span class="login-icon">🎧</span>
-          <h2 style="margin: 8px 0 0;">Acceso Exclusivo DJ</h2>
-          <p class="muted" style="margin: 4px 0 0; font-size: 0.9rem;">Inicia sesión para gestionar las pistas del evento.</p>
-        </div>
-        <form id="loginForm">
-          <label for="loginEmail">Correo Electrónico</label>
-          <input type="email" id="loginEmail" placeholder="tu-correo@dj.com" required>
-          
-          <label for="loginPassword">Contraseña</label>
-          <input type="password" id="loginPassword" placeholder="••••••••" required>
-          
-          <button type="submit" class="primary" id="loginButton">Validar Acceso</button>
-          <div class="notice" id="loginNotice" style="color: #fb7185; text-align: center; margin-top: 12px; min-height: 18px;"></div>
-        </form>
-      </div>
-    </div>
-
-    <footer>
-      <p>&copy; 2026 · Pide Tu Tema para Eventos en Vivo</p>
-    </footer>
-
-  </div>
-
-  <!-- Carga ordenada de Scripts (SDK de Supabase primero) -->
-  <script src="https://jsdelivr.net"></script>
-  <script src="config.js"></script>
-  <script src="app.js"></script>
-</body>
-</html>
+  <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close" aria-label="Cerrar">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con el usuario creado en Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
+  <script src="config.js"></script><script src="app.js"></script>
+</body></html>
