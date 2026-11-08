@@ -23,5 +23,43 @@ button.vote {
 }
 button.vote:active {
   transform: scale(0.9);
+
+  /* ==========================================
+   🔔 CONTENEDOR Y TARJETAS DE NOTIFICACIONES
+   ========================================== */
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9999;
+  max-width: 340px;
+  width: calc(100% - 40px);
+}
+
+.toast-alert {
+  background: rgba(25, 15, 48, 0.95);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--cyan); /* Línea neón distintiva */
+  padding: 14px 18px;
+  border-radius: 14px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+  animation: toast-enter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Animaciones de deslizamiento */
+@keyframes toast-enter {
+  from { opacity: 0; transform: translateY(-20px) scale(0.9); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes toast-leave {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100px); }
+}
+
 }
 }
