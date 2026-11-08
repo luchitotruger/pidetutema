@@ -8,29 +8,7 @@ let eventId=null,rows=[],session=null,channel=null;
 const voterToken=localStorage.getItem('pide_tu_tema_voter')||crypto.randomUUID(); localStorage.setItem('pide_tu_tema_voter',voterToken);
 function setNotice(text,error=false){el.notice.textContent=text;el.notice.style.color=error?'#fecdd3':'#a7f3d0'}
 function showGuest(){el.guest.hidden=false;el.dj.hidden=true;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view==='guest'))}
-// 🛠️ MODO DESARROLLO FORZADO: Forzamos el panel sin modal de login
-async function openDj() {
-  // 1. Simulamos la sesión del DJ
-  session = {
-    user: { email: 'luchitotruger@gmail.com' }
-  };
-
-  // 2. Ocultamos la vista de invitados y FORZAMOS a ocultar el modal de login
-  el.guest.hidden = true;
-  el.dj.hidden = false;
-  el.loginModal.hidden = true; // <-- Esto cierra el recuadro de usuario/clave
-  el.loginNotice.textContent = ''; // <-- Limpia el mensaje de error anterior
-  
-  // 3. Activamos visualmente la pestaña del DJ
-  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === el.djNav));
-  
-  // 4. Pintamos tu identidad de DJ en la barra
-  el.djIdentity.innerHTML = `<span>Sesión (Modo Dev): ${esc(session.user.email)}</span><button class="logout" id="logoutBtn">Salir</button>`;
-  $('logoutBtn').onclick = logout;
-  
-  // 5. Cargamos las canciones reales de tu Supabase
-  await load();
-}
+async function openDj(){if(!configured){el.loginNotice.textContent='Completa config.js con Project URL y Publishable key.';el.loginModal.hidden=false;return}const {data}=await db.auth.getSession();session=data.session;if(!session){el.loginModal.hidden=false;setTimeout(()=>el.loginEmail.focus(),50);return}el.guest.hidden=true;el.dj.hidden=false;el.loginModal.hidden=true;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===el.djNav));el.djIdentity.innerHTML=`<span>Sesión: ${esc(session.user.email)}</span><button class="logout" id="logoutBtn">Salir</button>`;$('logoutBtn').onclick=logout;await load()}
 async function logout(){await db?.auth.signOut();session=null;showGuest();el.djIdentity.textContent=''}
 async function load(){if(!db){setNotice('Falta configurar Supabase en config.js.',true);render();return}const {data:e,error}=await db.from('events').select('id,name').eq('slug',cfg.EVENT_SLUG).eq('is_active',true).maybeSingle();if(error||!e){setNotice('Evento no disponible. Revisa el slug y que esté activo.',true);return}eventId=e.id;el.eventName.textContent=e.name.toUpperCase()+' ✨';await refreshRows();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:requests`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},refreshRows).subscribe()}
 async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);return}rows=data||[];render()}
