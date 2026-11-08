@@ -74,6 +74,7 @@ async function buscarEniTunes(query) {
   });
 }
 
-
+// Inicializamos el buscador inteligente de música
+iniciarBuscadoriTunes();
 
 load();
