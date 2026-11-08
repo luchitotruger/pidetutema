@@ -8,7 +8,9 @@ let eventId=null,rows=[],session=null,channel=null;
 const voterToken=localStorage.getItem('pide_tu_tema_voter')||crypto.randomUUID(); localStorage.setItem('pide_tu_tema_voter',voterToken);
 function setNotice(text,error=false){el.notice.textContent=text;el.notice.style.color=error?'#fecdd3':'#a7f3d0'}
 function showGuest(){el.guest.hidden=false;el.dj.hidden=true;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view==='guest'))}
-async function  // 1. Simulamos la sesión del DJ
+// 🛠️ MODO DESARROLLO FORZADO: Forzamos el panel sin modal de login
+async function openDj() {
+  // 1. Simulamos la sesión del DJ
   session = {
     user: { email: 'luchitotruger@gmail.com' }
   };
@@ -28,6 +30,7 @@ async function  // 1. Simulamos la sesión del DJ
   
   // 5. Cargamos las canciones reales de tu Supabase
   await load();
+}
 async function logout(){await db?.auth.signOut();session=null;showGuest();el.djIdentity.textContent=''}
 async function load(){if(!db){setNotice('Falta configurar Supabase en config.js.',true);render();return}const {data:e,error}=await db.from('events').select('id,name').eq('slug',cfg.EVENT_SLUG).eq('is_active',true).maybeSingle();if(error||!e){setNotice('Evento no disponible. Revisa el slug y que esté activo.',true);return}eventId=e.id;el.eventName.textContent=e.name.toUpperCase()+' ✨';await refreshRows();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:requests`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},refreshRows).subscribe()}
 async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);return}rows=data||[];render()}
