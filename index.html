@@ -63,7 +63,7 @@
 
     <section id="dj" hidden>
       <div id="djIdentity" class="dj-identity"></div>
-      <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><button id="highlightDedication" class="tool-button dedication-control" type="button" disabled>💬 Destacar dedicatoria</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
+      <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><button id="highlightDedication" class="tool-button dedication-control" type="button" disabled>💬 Destacar dedicatoria</button><button id="clearProjectedDedication" class="tool-button" type="button" disabled>↩ Volver a Sonando</button><button id="openScreenMode" class="tool-button" type="button">🎬 Abrir pantalla</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
       <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
       <section class="card party-summary" aria-labelledby="partySummaryTitle">
         <div class="section-head"><div><small>RESUMEN EN VIVO</small><h2 id="partySummaryTitle">📊 Resumen de la fiesta</h2></div><button id="toggleSummary" class="icon-button" type="button" aria-expanded="true">Ocultar</button></div>
@@ -85,6 +85,16 @@
     <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨</footer>
   </main>
 
+  <section id="screenMode" class="screen-mode" hidden aria-label="Modo pantalla">
+    <div class="screen-ambient screen-a"></div><div class="screen-ambient screen-b"></div>
+    <header class="screen-header"><div><span class="screen-live"><i></i> FIESTA EN VIVO</span><h1 id="screenEventName">Pide Tu Tema</h1></div><div class="screen-actions"><button id="screenFullscreen" type="button">⛶ Pantalla completa</button><button id="screenExit" type="button">✕ Salir</button></div></header>
+    <main class="screen-stage">
+      <section id="screenNow" class="screen-now"></section>
+      <aside class="screen-ranking"><span class="screen-section-label">🏆 LAS MÁS VOTADAS</span><div id="screenTop3"></div></aside>
+    </main>
+    <section id="screenDedication" class="screen-dedication" hidden><div id="screenDedicationArtwork"></div><span>💬 DEDICATORIA DE LA PISTA</span><h2 id="screenDedicationSong"></h2><p id="screenDedicationMessage"></p><strong id="screenDedicationRequester"></strong></section>
+    <footer class="screen-footer"><span>Escanea · Pide · Vota · Baila</span><span id="screenClock"></span></footer>
+  </section>
   <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con tu usuario de Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
   <div id="dedicationSpotlight" class="dedication-spotlight" hidden role="dialog" aria-modal="true" aria-labelledby="dedicationSpotlightTitle">
     <div class="dedication-spotlight-card">
