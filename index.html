@@ -65,7 +65,7 @@
       <div id="djIdentity" class="dj-identity"></div>
       <section class="card event-manager">
         <div class="section-head"><div><small>GESTIÓN DE EVENTOS</small><h2>🎉 Mis eventos</h2></div><button id="newEventButton" class="tool-button" type="button">＋ Nuevo evento</button></div>
-        <div class="event-switcher-row"><select id="eventSelector" aria-label="Seleccionar evento"></select><button id="copyEventLink" class="tool-button" type="button">🔗 Copiar enlace</button><button id="toggleEventActive" class="tool-button" type="button">⏸ Pausar evento</button></div>
+        <div class="event-switcher-row"><select id="eventSelector" aria-label="Seleccionar evento"></select><button id="copyEventLink" class="tool-button" type="button">🔗 Copiar enlace</button><button id="showEventQr" class="tool-button" type="button">▦ Ver QR</button><button id="toggleEventActive" class="tool-button" type="button">⏸ Pausar evento</button></div>
         <div id="eventManagerMeta" class="event-manager-meta"></div>
         <form id="newEventForm" class="new-event-form" hidden>
           <div class="two"><div><label for="newEventName">Nombre del evento *</label><input id="newEventName" maxlength="100" required placeholder="Ej: Cumpleaños Carolina"></div><div><label for="newEventDate">Fecha y hora</label><input id="newEventDate" type="datetime-local"></div></div>
@@ -99,11 +99,12 @@
     <header class="screen-header"><div><span class="screen-live"><i></i> FIESTA EN VIVO</span><h1 id="screenEventName">Pide Tu Tema</h1></div><div class="screen-actions"><button id="screenFullscreen" type="button">⛶ Pantalla completa</button><button id="screenExit" type="button">✕ Salir</button></div></header>
     <main class="screen-stage">
       <section id="screenNow" class="screen-now"></section>
-      <aside class="screen-ranking"><span class="screen-section-label">🏆 LAS MÁS VOTADAS</span><div id="screenTop3"></div></aside>
+      <aside class="screen-ranking"><span class="screen-section-label">🏆 LAS MÁS VOTADAS</span><div id="screenTop3"></div><div class="screen-qr-mini"><div id="screenQr"></div><span>📱 Escanea y pide tu canción</span></div></aside>
     </main>
     <section id="screenDedication" class="screen-dedication" hidden><div id="screenDedicationArtwork"></div><span>💬 DEDICATORIA DE LA PISTA</span><h2 id="screenDedicationSong"></h2><p id="screenDedicationMessage"></p><strong id="screenDedicationRequester"></strong></section>
     <footer class="screen-footer"><span>Escanea · Pide · Vota · Baila</span><span id="screenClock"></span></footer>
   </section>
+  <div id="eventQrModal" class="qr-modal" hidden role="dialog" aria-modal="true" aria-labelledby="eventQrTitle"><div class="qr-card"><button id="closeEventQr" class="modal-close" type="button">×</button><span class="qr-kicker">📱 ACCESO AL EVENTO</span><h2 id="eventQrTitle">Código QR</h2><p id="eventQrName"></p><div id="eventQrCanvas" class="qr-canvas"></div><p id="eventQrUrl" class="qr-url"></p><div class="qr-actions"><button id="downloadEventQr" class="primary" type="button">⬇ Descargar PNG</button><button id="copyEventQrLink" class="tool-button" type="button">🔗 Copiar enlace</button></div></div></div>
   <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con tu usuario de Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
   <div id="dedicationSpotlight" class="dedication-spotlight" hidden role="dialog" aria-modal="true" aria-labelledby="dedicationSpotlightTitle">
     <div class="dedication-spotlight-card">
@@ -117,5 +118,6 @@
       <button id="closeDedicationAction" class="primary" type="button">✨ VOLVER A LA FIESTA</button>
     </div>
   </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="config.js"></script><script src="app.js"></script>
 </body></html>
