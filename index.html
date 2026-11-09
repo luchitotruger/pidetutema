@@ -28,6 +28,13 @@
         <div class="music-search-wrap"><span aria-hidden="true">🔎</span><input id="musicSearch" maxlength="100" placeholder="Ej: karol g provenza" autocomplete="off"><button id="clearMusicSearch" type="button" aria-label="Limpiar búsqueda" hidden>×</button></div>
         <div id="musicSearchStatus" class="music-search-status" aria-live="polite"></div>
         <div id="musicResults" class="music-results" hidden></div>
+        <button id="surpriseButton" class="surprise-button" type="button">🎲 NO SÉ QUÉ PEDIR · SORPRÉNDEME</button>
+        <section id="surprisePanel" class="surprise-panel" hidden>
+          <div class="surprise-head"><div><small>INSPIRACIÓN PARA LA PISTA</small><h3>✨ ¿Qué ambiente buscas?</h3></div><button id="closeSurprise" type="button" aria-label="Cerrar sugerencias">×</button></div>
+          <div id="surpriseCategories" class="surprise-categories"></div>
+          <div id="surpriseSuggestions" class="surprise-suggestions"></div>
+          <button id="shuffleSurprise" class="shuffle-surprise" type="button">🎲 Dame otras opciones</button>
+        </section>
         <button id="manualSongToggle" class="manual-song-toggle" type="button">✍️ No encuentro la canción, escribir manualmente</button>
         <div id="selectedMusic" class="selected-music" hidden></div>
         <div id="manualSongFields" hidden>
