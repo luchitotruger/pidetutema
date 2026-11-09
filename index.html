@@ -67,6 +67,15 @@
         <div class="section-head"><div><small>GESTIÓN DE EVENTOS</small><h2>🎉 Mis eventos</h2></div><button id="newEventButton" class="tool-button" type="button">＋ Nuevo evento</button></div>
         <div class="event-switcher-row"><select id="eventSelector" aria-label="Seleccionar evento"></select><button id="copyEventLink" class="tool-button" type="button">🔗 Copiar enlace</button><button id="showEventQr" class="tool-button" type="button">▦ Ver QR</button><button id="toggleEventActive" class="tool-button" type="button">⏸ Pausar evento</button></div>
         <div id="eventManagerMeta" class="event-manager-meta"></div>
+        <button id="customizeEventButton" class="customize-event-button" type="button">🎨 Personalizar evento</button>
+        <form id="eventThemeForm" class="event-theme-form" hidden>
+          <div class="theme-form-head"><div><small>IDENTIDAD DEL EVENTO</small><h3>🎨 Nombre, color y estilo</h3></div><button id="closeThemeForm" type="button" aria-label="Cerrar">×</button></div>
+          <label for="eventDisplayName">Nombre visible</label><input id="eventDisplayName" maxlength="100" placeholder="Ej: 🎉 GASPAR FEST 2026 🎉">
+          <label>Estilo</label><div id="themeChoices" class="theme-choices"></div>
+          <div id="customColors" class="custom-colors" hidden><label>Colores personalizados</label><div class="color-grid"><label>Principal<input id="themePrimary" type="color" value="#8b5cf6"></label><label>Secundario<input id="themeSecondary" type="color" value="#ec4899"></label><label>Acento<input id="themeAccent" type="color" value="#22d3ee"></label></div></div>
+          <div id="themePreview" class="theme-preview"><span>● FIESTA EN VIVO</span><strong id="themePreviewName">Pide Tu Tema</strong><small>🔥 Ranking · 🔊 Sonando ahora · ❤️ Vota</small><button type="button">PEDIR CANCIÓN</button></div>
+          <div class="theme-actions"><button class="primary" type="submit">Guardar diseño</button><button id="resetEventTheme" class="tool-button" type="button">↺ Neon DJ</button></div><div id="themeNotice" class="notice"></div>
+        </form>
         <form id="newEventForm" class="new-event-form" hidden>
           <div class="two"><div><label for="newEventName">Nombre del evento *</label><input id="newEventName" maxlength="100" required placeholder="Ej: Cumpleaños Carolina"></div><div><label for="newEventDate">Fecha y hora</label><input id="newEventDate" type="datetime-local"></div></div>
           <div class="event-form-actions"><button class="primary" type="submit">Crear evento</button><button id="cancelNewEvent" class="tool-button" type="button">Cancelar</button></div><div id="newEventNotice" class="notice"></div>
