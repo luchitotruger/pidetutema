@@ -13,6 +13,20 @@
 <body>
   <div class="ambient one"></div><div class="ambient two"></div>
   <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="numberOneCelebration" class="number-one-celebration" hidden role="dialog" aria-modal="true" aria-labelledby="numberOneTitle">
+    <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
+    <div class="number-one-card">
+      <button id="closeNumberOne" class="number-one-close" type="button" aria-label="Cerrar celebración">×</button>
+      <div class="number-one-crown">👑</div>
+      <span class="number-one-kicker">¡LA FIESTA HABLÓ!</span>
+      <h2 id="numberOneTitle">¡Tu canción es #1!</h2>
+      <div id="numberOneArtwork" class="number-one-artwork"></div>
+      <strong id="numberOneSong"></strong>
+      <span id="numberOneArtist"></span>
+      <div id="numberOneVotes" class="number-one-votes"></div>
+      <button id="closeNumberOneAction" class="primary" type="button">🔥 ¡A SEGUIR BAILANDO!</button>
+    </div>
+  </div>
   <main class="shell">
     <header class="hero">
       <div><span class="live">● FIESTA EN VIVO</span><h1>🎧 Pide Tu Tema</h1><p>Tú eliges. Luis DJ mezcla. Todos bailan.</p></div>
