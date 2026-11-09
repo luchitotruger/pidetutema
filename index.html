@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#6d28d9">
   <title>Pide Tu Tema | Luis DJ</title>
+  <link rel="preconnect" href="https://itunes.apple.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -23,8 +24,16 @@
       <form id="requestForm" class="card form-card">
         <span id="eventName" class="pill">TU FIESTA ✨</span>
         <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
-        <label for="title">Canción *</label><input id="title" maxlength="120" required placeholder="Ej: Mentirosa" autocomplete="off">
-        <label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Ej: Ráfaga" autocomplete="off">
+        <label for="musicSearch">Buscar canción o artista</label>
+        <div class="music-search-wrap"><span aria-hidden="true">🔎</span><input id="musicSearch" maxlength="100" placeholder="Ej: karol g provenza" autocomplete="off"><button id="clearMusicSearch" type="button" aria-label="Limpiar búsqueda" hidden>×</button></div>
+        <div id="musicSearchStatus" class="music-search-status" aria-live="polite"></div>
+        <div id="musicResults" class="music-results" hidden></div>
+        <button id="manualSongToggle" class="manual-song-toggle" type="button">✍️ No encuentro la canción, escribir manualmente</button>
+        <div id="selectedMusic" class="selected-music" hidden></div>
+        <div id="manualSongFields" hidden>
+          <label for="title">Canción *</label><input id="title" maxlength="120" placeholder="Nombre de la canción" autocomplete="off">
+          <label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Nombre del artista" autocomplete="off">
+        </div>
         <div class="two"><div><label for="requester">Tu nombre o mesa</label><input id="requester" maxlength="80" placeholder="Ej: Carolina · Mesa 4"></div><div><label for="message">Dedicatoria</label><input id="message" maxlength="240" placeholder="Un saludo para... 💜"></div></div>
         <button id="sendButton" class="primary" type="submit">🚀 PEDIR CANCIÓN</button><div id="notice" class="notice" role="status"></div>
       </form>
@@ -37,7 +46,7 @@
       <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
       <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
     </section>
-    <footer>Escanea · Pide · Vota · Baila ✨</footer>
+    <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨</footer>
   </main>
 
   <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con tu usuario de Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
