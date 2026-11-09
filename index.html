@@ -44,6 +44,21 @@
       <div id="djIdentity" class="dj-identity"></div>
       <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
       <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
+      <section class="card party-summary" aria-labelledby="partySummaryTitle">
+        <div class="section-head"><div><small>RESUMEN EN VIVO</small><h2 id="partySummaryTitle">📊 Resumen de la fiesta</h2></div><button id="toggleSummary" class="icon-button" type="button" aria-expanded="true">Ocultar</button></div>
+        <div id="summaryContent">
+          <div class="summary-grid">
+            <article class="summary-highlight winner"><span>🏆 Más votada</span><strong id="summaryTopSong">Sin datos</strong><small id="summaryTopSongMeta">Aún no hay pedidos</small></article>
+            <article class="summary-highlight"><span>🎤 Artista favorito</span><strong id="summaryTopArtist">Sin datos</strong><small id="summaryTopArtistMeta">0 solicitudes</small></article>
+            <article class="summary-highlight"><span>🔥 Momento más activo</span><strong id="summaryPeakHour">Sin datos</strong><small id="summaryPeakHourMeta">0 solicitudes</small></article>
+          </div>
+          <div class="summary-lists">
+            <div><h3>Top 5 canciones</h3><div id="summaryTopSongs" class="summary-ranking"></div></div>
+            <div><h3>Estados de los pedidos</h3><div id="summaryStatuses" class="summary-statuses"></div></div>
+          </div>
+          <div class="summary-footer"><span id="summaryUpdated">Se actualiza en tiempo real</span><button id="copySummary" class="tool-button" type="button">📋 Copiar resumen</button></div>
+        </div>
+      </section>
       <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
     </section>
     <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨</footer>
