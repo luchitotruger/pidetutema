@@ -1,45 +1,32 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#6d28d9">
-  <title>Pide Tu Tema | Luis DJ</title>
-  <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#6d28d9">
+  <title>Pide Tu Tema V3 | Luis DJ</title>
+  <link rel="preconnect" href="https://itunes.apple.com"><link rel="preconnect" href="https://cdn.jsdelivr.net"><link rel="stylesheet" href="styles-v3.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="ambient one"></div><div class="ambient two"></div>
-  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div class="ambient one"></div><div class="ambient two"></div><div id="toastContainer" class="toast-container" aria-live="polite"></div>
   <main class="shell">
-    <header class="hero">
-      <div><span class="live">● FIESTA EN VIVO</span><h1>🎧 Pide Tu Tema</h1><p>Tú eliges. Luis DJ mezcla. Todos bailan.</p></div>
-      <nav aria-label="Vistas"><button data-view="guest" class="tab active">📱 Invitados</button><button id="djNav" class="tab">🎛️ Panel DJ <span id="newBadge" class="badge" hidden>0</span></button></nav>
-    </header>
-    <div id="connectionBar" class="connection online"><span class="dot"></span><span id="connectionText">Conectado en vivo</span></div>
-
+    <header class="hero"><div><span class="live">● FIESTA EN VIVO</span><h1>🎧 Pide Tu Tema</h1><p>Busca, elige y vota. Luis DJ pone la música.</p></div><nav><button data-view="guest" class="tab active">📱 Invitados</button><button id="djNav" class="tab">🎛️ Panel DJ</button></nav></header>
     <section id="guest" class="guest-grid">
       <form id="requestForm" class="card form-card">
-        <span id="eventName" class="pill">TU FIESTA ✨</span>
-        <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
-        <label for="title">Canción *</label><input id="title" maxlength="120" required placeholder="Ej: Mentirosa" autocomplete="off">
-        <label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Ej: Ráfaga" autocomplete="off">
+        <span id="eventName" class="pill">TU FIESTA ✨</span><h2>¿Qué quieres bailar?</h2><p class="muted">Escribe parte del nombre o del artista y selecciona una canción.</p>
+        <label for="musicSearch">Buscar canción o artista</label>
+        <div class="search-wrap"><span>🔎</span><input id="musicSearch" maxlength="100" placeholder="Ej: karol g provenza" autocomplete="off"><button id="clearSearch" type="button" aria-label="Limpiar búsqueda" hidden>×</button></div>
+        <div id="searchStatus" class="search-status" aria-live="polite"></div><div id="searchResults" class="search-results" hidden></div>
+        <button id="manualToggle" class="manual-toggle" type="button">✍️ No encuentro la canción, escribir manualmente</button>
+        <div id="selectedTrack" class="selected-track" hidden></div>
+        <div id="manualFields" hidden><label for="title">Canción *</label><input id="title" maxlength="120" placeholder="Nombre de la canción" autocomplete="off"><label for="artist">Artista</label><input id="artist" maxlength="120" placeholder="Nombre del artista" autocomplete="off"></div>
         <div class="two"><div><label for="requester">Tu nombre o mesa</label><input id="requester" maxlength="80" placeholder="Ej: Carolina · Mesa 4"></div><div><label for="message">Dedicatoria</label><input id="message" maxlength="240" placeholder="Un saludo para... 💜"></div></div>
         <button id="sendButton" class="primary" type="submit">🚀 PEDIR CANCIÓN</button><div id="notice" class="notice" role="status"></div>
       </form>
-      <div class="card ranking-card"><div class="section-head"><div><small>RANKING EN VIVO</small><h2>🔥 Lo que pide la fiesta</h2></div><button id="refreshButton" class="icon-button" aria-label="Actualizar">↻</button></div><div id="nowPlaying" class="now-playing" hidden></div><div id="ranking" class="song-list"></div></div>
+      <div class="card ranking-card"><div class="section-head"><div><small>RANKING EN VIVO</small><h2>🔥 Lo que pide la fiesta</h2></div><button id="refreshButton" class="icon-button">↻</button></div><div id="ranking" class="song-list"></div></div>
     </section>
-
-    <section id="dj" hidden>
-      <div id="djIdentity" class="dj-identity"></div>
-      <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
-      <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
-      <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
-    </section>
-    <footer>Escanea · Pide · Vota · Baila ✨</footer>
+    <section id="dj" hidden><div id="djIdentity" class="dj-identity"></div><div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div><div class="card"><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2><div id="djList" class="song-list"></div></div></section>
+    <footer>Catálogo musical provisto por iTunes · Escanea · Pide · Vota · Baila ✨</footer>
   </main>
-
-  <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><p class="muted">Ingresa con tu usuario de Supabase Auth.</p><label for="loginEmail">Correo</label><input id="loginEmail" type="email" autocomplete="username" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice" role="alert"></div></form></div>
-  <script src="config.js"></script><script src="app.js"></script>
+  <div id="loginModal" class="modal" hidden><form id="loginForm" class="login-card"><button type="button" id="closeLogin" class="modal-close">×</button><div class="login-icon">🎧</div><small>ACCESO PRIVADO</small><h2>Panel DJ</h2><label for="loginEmail">Correo</label><input id="loginEmail" type="email" required><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" minlength="8" required><button id="loginButton" class="primary">ENTRAR</button><div id="loginNotice" class="notice"></div></form></div>
+  <script src="config.js"></script><script src="app-v3.js"></script>
 </body></html>
