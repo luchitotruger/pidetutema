@@ -45,6 +45,29 @@
         </div>
         <div id="guestIdentityStatus" class="identity-status"></div>
       </section>
+      <!-- V5.0.4 GAMIFICACION INVITADO -->
+      <section id="guestGame" class="card guest-game">
+        <div class="game-head"><div><small>GAMIFICACIÓN</small><h2>🏆 Tu participación</h2></div><button id="refreshGuestGame" class="icon-button" type="button" aria-label="Actualizar puntuación">↻</button></div>
+        <div id="guestGameNotice" class="game-notice">Calculando tus puntos…</div>
+        <div id="guestGameContent" hidden>
+          <div class="game-score"><span id="gameLevelIcon">🎧</span><div><b id="gamePoints">0</b><small>puntos</small></div><strong id="gameLevel">Calentando motores</strong></div>
+          <div class="game-breakdown"><span>🎵 Pedidos <b id="gameRequestPoints">0</b></span><span>❤️ Votos <b id="gameVotePoints">0</b></span><span>▶️ Reproducidas <b id="gamePlayedPoints">0</b></span></div>
+          <div class="game-progress"><i id="gameProgress"></i></div><small id="gameNextLevel" class="game-next"></small>
+        </div>
+      </section>
+      <!-- V5.0.2 MI ACTIVIDAD -->
+      <section id="guestActivity" class="card guest-activity">
+        <div class="activity-head"><div><small>MI ACTIVIDAD</small><h2>✨ Tu noche</h2></div><button id="refreshMyActivity" class="icon-button" type="button" aria-label="Actualizar mi actividad">↻</button></div>
+        <div id="myActivityNotice" class="activity-notice">Cargando tu actividad…</div>
+        <div id="myActivityContent" hidden>
+          <div class="activity-kpis">
+            <article><span>🎵</span><b id="myRequests">0</b><small>Pedidos</small></article>
+            <article><span>❤️</span><b id="myVotes">0</b><small>Votos</small></article>
+            <article><span>▶️</span><b id="myPlayed">0</b><small>Reproducidas</small></article>
+          </div>
+          <div id="mySongs" class="my-songs"></div>
+        </div>
+      </section>
       <form id="requestForm" class="card form-card">
         <span id="eventName" class="pill">TU FIESTA ✨</span>
         <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
@@ -142,6 +165,19 @@
           </div>
           <div class="summary-footer"><span id="summaryUpdated">Se actualiza en tiempo real</span><button id="copySummary" class="tool-button" type="button">📋 Copiar resumen</button></div>
         </div>
+      </section>
+      <!-- V5.0.4 GAMIFICACION RANKING -->
+      <section class="card game-leaderboard-card">
+        <div class="section-head"><div><small>GAMIFICACIÓN</small><h2>🏆 Los más activos</h2><p class="muted game-help">2 pts por pedido · 1 pt por voto · 3 pts si tu canción fue reproducida.</p></div><button id="refreshGameLeaderboard" class="icon-button" type="button" aria-label="Actualizar ranking de invitados">↻</button></div>
+        <div id="gameLeaderboardNotice" class="game-notice">Calculando posiciones…</div>
+        <div id="gameLeaderboard" class="game-leaderboard"></div>
+      </section>
+      <!-- V5.0.3 RANKING INTELIGENTE -->
+      <section class="card smart-ranking-card">
+        <div class="section-head"><div><small>ASISTENTE DEL DJ</small><h2>🧠 Ranking inteligente</h2><p class="muted smart-ranking-help">Sugerencias por votos, espera y tendencia. Tú siempre decides qué suena.</p></div><button id="refreshSmartRanking" class="icon-button" type="button" aria-label="Actualizar ranking inteligente">↻</button></div>
+        <div class="smart-score-legend"><span>❤️ Votos</span><span>⏱ Espera</span><span>🔥 Tendencia</span></div>
+        <div id="smartRankingNotice" class="smart-ranking-notice">Calculando recomendaciones…</div>
+        <div id="smartRanking" class="smart-ranking"></div>
       </section>
       <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
     </section>
