@@ -522,3 +522,133 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
     font-size: .65rem;
   }
 }
+
+/* ===== V5.0.4.7 PANEL DJ - METRICAS COMPACTAS ===== */
+/* Notebook: numeros 28-30px, etiquetas 10-11px y espaciado mas eficiente */
+@media (min-width: 681px) {
+  .analytics-kpis {
+    gap: 14px 20px;
+    margin: 4px 0 16px;
+  }
+  .analytics-kpis article {
+    padding: 6px 0;
+  }
+  .analytics-kpis b {
+    margin: 4px 0 2px;
+    font-size: 29px;
+    line-height: 1;
+  }
+  .analytics-kpis small {
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+
+  .analytics-columns {
+    gap: 20px;
+    margin-top: 15px;
+  }
+  .analytics-columns > div,
+  .analytics-hours,
+  .engagement-panel {
+    padding: 13px 14px;
+  }
+  .analytics-hours,
+  .engagement-panel {
+    margin-top: 14px;
+  }
+
+  .engagement-kpis {
+    gap: 12px 20px;
+  }
+  .engagement-kpis article {
+    padding: 6px 0;
+  }
+  .engagement-kpis b {
+    margin: 4px 0 2px;
+    font-size: 29px;
+    line-height: 1;
+  }
+  .engagement-kpis small {
+    font-size: 10.5px;
+    line-height: 1.2;
+  }
+  .engagement-head > strong {
+    font-size: 29px;
+  }
+  .engagement-funnel {
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+}
+
+/* Celular: 2 columnas, numeros 23-25px, menos alto y menos scroll */
+@media (max-width: 680px) {
+  .analytics-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 9px 10px;
+    margin: 2px 0 12px;
+  }
+  .analytics-kpis article {
+    min-height: 58px;
+    padding: 4px 0;
+  }
+  .analytics-kpis article > span {
+    font-size: 16px;
+  }
+  .analytics-kpis b {
+    margin: 3px 0 1px;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .analytics-kpis small {
+    font-size: 10px;
+    line-height: 1.15;
+  }
+
+  .analytics-columns {
+    gap: 9px;
+    margin-top: 11px;
+  }
+  .analytics-columns > div,
+  .analytics-hours,
+  .engagement-panel {
+    padding: 11px 12px;
+  }
+  .analytics-hours,
+  .engagement-panel {
+    margin-top: 9px;
+  }
+
+  .engagement-head {
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+  }
+  .engagement-head > strong {
+    font-size: 24px;
+  }
+  .engagement-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 9px 10px;
+  }
+  .engagement-kpis article {
+    min-height: 56px;
+    padding: 4px 0;
+  }
+  .engagement-kpis span {
+    font-size: 15px;
+  }
+  .engagement-kpis b {
+    margin: 3px 0 1px;
+    font-size: 24px;
+    line-height: 1;
+  }
+  .engagement-kpis small {
+    font-size: 10px;
+    line-height: 1.15;
+  }
+  .engagement-funnel {
+    margin-top: 11px;
+    padding-top: 11px;
+    gap: 7px;
+  }
+}
