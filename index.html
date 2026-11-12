@@ -83,6 +83,28 @@
       </section>
       <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><button id="highlightDedication" class="tool-button dedication-control" type="button" disabled>💬 Destacar dedicatoria</button><button id="clearProjectedDedication" class="tool-button" type="button" disabled>↩ Volver a Sonando</button><button id="openScreenMode" class="tool-button" type="button">🎬 Abrir pantalla</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
       <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
+      <!-- V4.5.2 DASHBOARD ANALYTICS -->
+      <section class="card visitor-analytics" aria-labelledby="visitorAnalyticsTitle">
+        <div class="section-head"><div><small>ANALYTICS DE INVITADOS</small><h2 id="visitorAnalyticsTitle">📊 Conexiones del evento</h2></div><button id="refreshAnalytics" class="icon-button" type="button" aria-label="Actualizar estadísticas">↻</button></div>
+        <div id="analyticsNotice" class="analytics-notice">Cargando estadísticas…</div>
+        <div id="analyticsContent" hidden>
+          <div class="analytics-kpis">
+            <article><span>👥</span><b id="aVisitors">0</b><small>Visitantes únicos</small></article>
+            <article><span>📱</span><b id="aMobile">0</b><small>Celulares</small></article>
+            <article><span>📲</span><b id="aTablet">0</b><small>Tablets</small></article>
+            <article><span>💻</span><b id="aDesktop">0</b><small>Computadores</small></article>
+          </div>
+          <div class="analytics-highlight"><span>🔥 Hora peak</span><strong id="aPeakHour">Sin datos</strong><small id="aPeakMeta">Esperando conexiones</small></div>
+          <div class="analytics-time"><span>Primera conexión <b id="aFirstSeen">—</b></span><span>Última conexión <b id="aLastSeen">—</b></span></div>
+          <div class="analytics-columns">
+            <div><h3>Dispositivos</h3><div id="aDevices" class="analytics-bars"></div></div>
+            <div><h3>Sistemas</h3><div id="aOs" class="analytics-bars"></div></div>
+            <div><h3>Navegadores</h3><div id="aBrowsers" class="analytics-bars"></div></div>
+          </div>
+          <div class="analytics-hours"><h3>Conexiones por hora</h3><div id="aHours" class="hour-bars"></div></div>
+          <div id="analyticsUpdated" class="analytics-updated"></div>
+        </div>
+      </section>
       <section class="card party-summary" aria-labelledby="partySummaryTitle">
         <div class="section-head"><div><small>RESUMEN EN VIVO</small><h2 id="partySummaryTitle">📊 Resumen de la fiesta</h2></div><button id="toggleSummary" class="icon-button" type="button" aria-expanded="true">Ocultar</button></div>
         <div id="summaryContent">
