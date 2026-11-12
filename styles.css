@@ -204,5 +204,58 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 /* ===== V5.0.3 RANKING INTELIGENTE ===== */
 .smart-ranking-card{position:relative;overflow:hidden;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.10),transparent 30%),rgba(255,255,255,.025)}.smart-ranking-help{margin:4px 0 0;font-size:.72rem}.smart-score-legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.smart-score-legend span{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);font-size:.65rem;color:var(--muted)}.smart-ranking-notice{padding:14px 0;color:var(--muted);font-size:.76rem}.smart-ranking{display:grid;gap:9px}.smart-rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035)}.smart-rank-row:first-child{border-color:rgba(250,204,21,.28);background:linear-gradient(110deg,rgba(250,204,21,.10),rgba(236,72,153,.06))}.smart-position{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.07);font-size:1rem;font-weight:900}.smart-rank-row:first-child .smart-position{color:#fde68a;background:rgba(250,204,21,.12)}.smart-song{min-width:0}.smart-song strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smart-song small{display:block;margin-top:3px;color:var(--muted);font-size:.67rem}.smart-metrics{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}.smart-metrics span{font-size:.61rem;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.06)}.smart-score{text-align:right}.smart-score b{display:block;font-size:1.25rem;color:var(--event-accent)}.smart-score small{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}@media(max-width:600px){.smart-rank-row{grid-template-columns:34px minmax(0,1fr) 44px;padding:9px;gap:7px}.smart-position{width:32px;height:32px}.smart-score b{font-size:1rem}.smart-song strong{font-size:.82rem}.smart-metrics{justify-content:flex-start}.smart-score-legend{margin:9px 0}}
 
-/* ===== V5.0.4 GAMIFICACION ===== */
-.guest-game{margin-bottom:16px;overflow:hidden;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.13),transparent 34%),linear-gradient(145deg,rgba(25,15,48,.92),rgba(42,20,62,.74))}.game-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.game-head small,.game-leaderboard-card .section-head small{color:#fde68a;font-weight:900;letter-spacing:.1em}.game-head h2{margin:3px 0}.game-notice{padding:12px 0;color:var(--muted);font-size:.76rem}.game-score{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:12px;padding:14px;border:1px solid rgba(250,204,21,.2);border-radius:17px;background:rgba(250,204,21,.065)}.game-score>span{font-size:2rem}.game-score div b,.game-score div small{display:block}.game-score div b{font-size:2rem;line-height:1;color:#fde68a}.game-score div small{color:var(--muted);font-size:.62rem}.game-score>strong{text-align:right;color:#fff}.game-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}.game-breakdown span{padding:9px 6px;text-align:center;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.035);font-size:.67rem}.game-breakdown b{display:block;margin-top:3px;color:#fff}.game-progress{height:8px;margin-top:12px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.game-progress i{display:block;height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#facc15,var(--event-accent));transition:width .3s ease}.game-next{display:block;margin-top:6px;color:var(--muted);font-size:.64rem}.game-leaderboard-card{margin-bottom:18px;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.10),transparent 30%),rgba(255,255,255,.025)}.game-help{margin:4px 0 0;font-size:.7rem}.game-leaderboard{display:grid;gap:8px}.game-player{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}.game-player:nth-child(1){border-color:rgba(250,204,21,.35);background:linear-gradient(100deg,rgba(250,204,21,.11),rgba(236,72,153,.05))}.game-player-rank{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.06);font-weight:900}.game-player-copy{min-width:0}.game-player-copy b,.game-player-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.game-player-copy small{margin-top:3px;color:var(--muted);font-size:.64rem}.game-player-points{text-align:right}.game-player-points b{display:block;color:#fde68a;font-size:1.15rem}.game-player-points small{color:var(--muted);font-size:.58rem}.game-anon{opacity:.85}@media(max-width:680px){.game-score{grid-template-columns:auto auto 1fr;padding:11px;gap:9px}.game-score>span{font-size:1.55rem}.game-score div b{font-size:1.55rem}.game-score>strong{font-size:.72rem}.game-breakdown{grid-template-columns:1fr;gap:5px}.game-breakdown span{display:flex;justify-content:space-between;text-align:left}.game-breakdown b{display:inline;margin:0}.game-player{grid-template-columns:34px minmax(0,1fr) 48px;padding:9px}.game-player-rank{width:31px;height:31px}.game-player-copy b{font-size:.78rem}.game-player-points b{font-size:1rem}}
+/* ===== V5.0.4.1 LOOK & FEEL TU PERFIL FIESTA ===== */
+/* Campo de nombre/apodo: mayor jerarquia y mejor lectura */
+#guestNickname {
+  min-height: 58px;
+  padding: 14px 18px;
+  font-size: 19px;
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: .01em;
+  border-radius: 15px;
+}
+
+#guestNickname::placeholder {
+  font-size: 17px;
+  font-weight: 650;
+}
+
+/* Ambos botones comparten exactamente el mismo tratamiento visual */
+#saveGuestNickname,
+#clearGuestNickname {
+  min-height: 48px;
+  padding: 11px 16px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 850;
+  align-self: center;
+}
+
+/* Igualamos Modo Anonimo al boton primario Guardar nombre */
+#clearGuestNickname {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg,var(--event-primary),var(--event-secondary));
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+}
+
+#clearGuestNickname:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+@media (max-width: 700px) {
+  #guestNickname {
+    min-height: 60px;
+    padding: 15px 16px;
+    font-size: 20px;
+  }
+  #guestNickname::placeholder { font-size: 17px; }
+  #saveGuestNickname,
+  #clearGuestNickname {
+    width: 100%;
+    min-height: 50px;
+    font-size: 14px;
+  }
+}
