@@ -401,3 +401,124 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
   .engagement-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 14px}.engagement-kpis article{min-height:65px;padding:5px 0}.engagement-kpis article:last-child{grid-column:auto}.engagement-kpis b{font-size:1.35rem}
   .engagement-funnel{margin-top:14px;padding-top:14px}.funnel-row{grid-template-columns:80px minmax(65px,1fr) 28px;gap:7px;font-size:.65rem}
 }
+
+/* ===== V5.0.4.6 PANEL DJ - DETALLE RESUMEN EN VIVO ===== */
+/* Dispositivos / Sistemas / Navegadores como mini resumenes limpios */
+.analytics-columns > div {
+  position: relative;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+}
+.analytics-columns h3 {
+  margin-bottom: 13px;
+  color: #fff;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+.analytics-bar {
+  grid-template-columns: minmax(70px,auto) 1fr 30px;
+  gap: 9px;
+  min-height: 25px;
+  align-items: center;
+}
+.analytics-bar > span:first-child { color: var(--muted); }
+.analytics-bar b { color:#fff; font-size:.74rem; }
+.analytics-bar-track { height: 5px; }
+
+/* Conexiones por hora replica la tarjeta visual del resumen */
+.analytics-hours {
+  margin-top: 14px;
+  padding: 15px 16px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+}
+.analytics-hours h3 { color:#fff; }
+.hour-bars { height: 135px; }
+
+/* Participacion se convierte en un bloque hermano de Analytics */
+.engagement-panel {
+  margin-top: 14px;
+  padding: 17px 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+}
+.engagement-head {
+  margin-bottom: 13px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.engagement-head small { color: var(--muted); }
+.engagement-head > strong {
+  color: #fde68a;
+  font-size: 1.85rem;
+}
+
+/* KPIs de participacion con la misma lectura directa de Resumen en vivo */
+.engagement-kpis {
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  gap: 10px 16px;
+}
+.engagement-kpis article {
+  padding: 8px 0;
+  text-align: left;
+}
+.engagement-kpis span { font-size: 1rem; }
+.engagement-kpis b {
+  display:block;
+  margin: 5px 0 2px;
+  color:#fff;
+  font-size:1.55rem;
+  line-height:1;
+}
+.engagement-kpis small { color:var(--muted); }
+
+/* Visitantes / Pidieron / Votaron / Reproducidas: embudo como resumen de estado */
+.engagement-funnel {
+  margin-top: 14px;
+  padding: 15px 0 0;
+  border-top: 1px solid var(--line);
+}
+.funnel-row {
+  grid-template-columns: 110px 1fr 36px;
+  min-height: 27px;
+  align-items:center;
+}
+.funnel-row > span:first-child {
+  color: var(--muted);
+  font-weight: 700;
+}
+.funnel-row > b {
+  color:#fff;
+  text-align:right;
+}
+.funnel-track {
+  height: 5px;
+  background:rgba(255,255,255,.08);
+}
+
+@media (max-width: 680px) {
+  .analytics-columns > div,
+  .analytics-hours,
+  .engagement-panel {
+    padding: 13px 14px;
+    border-radius: 14px;
+  }
+  .analytics-columns { gap: 9px; }
+  .analytics-hours { margin-top: 9px; }
+  .engagement-panel { margin-top: 9px; }
+  .engagement-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px 14px;
+  }
+  .engagement-kpis article { min-height: 58px; }
+  .funnel-row {
+    grid-template-columns: 82px minmax(60px,1fr) 28px;
+    gap: 7px;
+    font-size: .65rem;
+  }
+}
