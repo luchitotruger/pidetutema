@@ -204,39 +204,73 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 /* ===== V5.0.3 RANKING INTELIGENTE ===== */
 .smart-ranking-card{position:relative;overflow:hidden;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.10),transparent 30%),rgba(255,255,255,.025)}.smart-ranking-help{margin:4px 0 0;font-size:.72rem}.smart-score-legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.smart-score-legend span{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);font-size:.65rem;color:var(--muted)}.smart-ranking-notice{padding:14px 0;color:var(--muted);font-size:.76rem}.smart-ranking{display:grid;gap:9px}.smart-rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035)}.smart-rank-row:first-child{border-color:rgba(250,204,21,.28);background:linear-gradient(110deg,rgba(250,204,21,.10),rgba(236,72,153,.06))}.smart-position{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.07);font-size:1rem;font-weight:900}.smart-rank-row:first-child .smart-position{color:#fde68a;background:rgba(250,204,21,.12)}.smart-song{min-width:0}.smart-song strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smart-song small{display:block;margin-top:3px;color:var(--muted);font-size:.67rem}.smart-metrics{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}.smart-metrics span{font-size:.61rem;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.06)}.smart-score{text-align:right}.smart-score b{display:block;font-size:1.25rem;color:var(--event-accent)}.smart-score small{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}@media(max-width:600px){.smart-rank-row{grid-template-columns:34px minmax(0,1fr) 44px;padding:9px;gap:7px}.smart-position{width:32px;height:32px}.smart-score b{font-size:1rem}.smart-song strong{font-size:.82rem}.smart-metrics{justify-content:flex-start}.smart-score-legend{margin:9px 0}}
 
-/* ===== V5.0.4.3 PERFIL FIESTA - ANCHO EQUILIBRADO ===== */
+/* ===== V5.0.4.4 PERFIL FIESTA - BOTONES BAJO NOMBRE ===== */
 .identity-editor {
-  grid-template-columns: minmax(210px, 0.8fr) auto auto;
+  display: grid;
+  grid-template-columns: 140px 140px;
+  grid-template-areas:
+    "name name"
+    "save anon";
+  justify-content: start;
   align-items: center;
   gap: 8px;
   width: 100%;
 }
 
 #guestNickname {
+  grid-area: name;
   width: 100%;
   min-width: 0;
   max-width: 280px;
   box-sizing: border-box;
 }
 
-#saveGuestNickname,
-#clearGuestNickname {
-  width: auto;
-  max-width: 100%;
-  white-space: nowrap;
+#saveGuestNickname {
+  grid-area: save;
 }
 
-@media (max-width: 900px) {
+#clearGuestNickname {
+  grid-area: anon;
+}
+
+/* Mismo look del boton Guardar nombre */
+#saveGuestNickname,
+#clearGuestNickname {
+  width: 140px;
+  min-height: 48px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg,var(--event-primary),var(--event-secondary));
+  box-shadow: 0 8px 20px rgba(0,0,0,.18);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+}
+
+#saveGuestNickname:hover,
+#clearGuestNickname:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+@media (max-width: 700px) {
   .identity-editor {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "name name"
+      "save anon";
+    gap: 8px;
   }
   #guestNickname {
-    width: 100%;
-    max-width: none;
-    min-width: 0;
+    max-width: 280px;
   }
   #saveGuestNickname,
   #clearGuestNickname {
     width: 100%;
+    min-width: 0;
   }
 }
