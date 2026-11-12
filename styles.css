@@ -76,18 +76,72 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 @media(min-width:1200px){body.layout-auto #guest{grid-template-columns:minmax(360px,.78fr) minmax(540px,1.22fr);gap:24px;align-items:start}body.layout-auto #guest .form-card{position:sticky;top:18px}body.layout-auto #guest .ranking-card{min-height:420px}}
 @media(max-width:780px){.layout-choices{grid-template-columns:1fr}.layout-choice{grid-template-columns:42px 1fr;justify-items:start;text-align:left;min-height:64px}.layout-choice small{grid-column:2}}
 
-/* ===== V5.0.1 AJUSTE LOOK & FEEL IDENTIDAD ===== */
-#guestNickname {
-  min-height: 52px;
-  padding: 12px 16px;
-  font-size: 17px;
-  font-weight: 700;
-  border-radius: 14px;
+/* ===== V5.0.1.1 LOOK & FEEL ANALYTICS INVITADOS ===== */
+.visitor-analytics{
+  position:relative;
+  overflow:hidden;
+  padding:22px;
+  border:1px solid rgba(255,255,255,.11);
+  background:
+    radial-gradient(circle at 92% 0%,rgba(236,72,153,.15),transparent 31%),
+    radial-gradient(circle at 8% 10%,rgba(99,102,241,.13),transparent 30%),
+    rgba(15,18,32,.92);
+  box-shadow:0 20px 50px rgba(0,0,0,.24);
 }
-
-#clearGuestNickname {
-  padding: 7px 12px;
-  font-size: 12px;
-  min-height: 34px;
-  align-self: center;
+.visitor-analytics .section-head{align-items:flex-start;margin-bottom:6px}
+.visitor-analytics .section-head small{display:block;color:var(--event-accent);font-size:.68rem;font-weight:900;letter-spacing:.12em}
+.visitor-analytics .section-head h2{margin:4px 0 0;font-size:1.35rem;letter-spacing:-.02em}
+.visitor-analytics #refreshAnalytics{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);transition:.18s ease}
+.visitor-analytics #refreshAnalytics:hover{transform:rotate(20deg);background:rgba(255,255,255,.11)}
+.analytics-notice{padding:24px 12px;color:var(--muted);text-align:center}
+.analytics-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0 14px}
+.analytics-kpis article{
+  position:relative;padding:16px 10px;border:1px solid rgba(255,255,255,.10);border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.025));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.analytics-kpis article>span{font-size:1.5rem;filter:drop-shadow(0 5px 10px rgba(0,0,0,.25))}
+.analytics-kpis b{margin:5px 0 2px;font-size:2rem;line-height:1;color:#fff;letter-spacing:-.04em}
+.analytics-kpis small{font-size:.68rem;color:var(--muted)}
+.analytics-highlight{
+  grid-template-columns:auto 1fr auto;gap:14px;margin-top:4px;padding:16px 18px;
+  border:1px solid rgba(250,204,21,.28);border-radius:18px;
+  background:linear-gradient(115deg,rgba(250,204,21,.12),rgba(236,72,153,.10),rgba(99,102,241,.08));
+}
+.analytics-highlight span{font-size:.72rem;letter-spacing:.08em;color:#fde68a}
+.analytics-highlight strong{font-size:1.18rem;color:#fff}
+.analytics-highlight small{padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.07)}
+.analytics-time{margin:12px 0 0;padding:10px 2px 14px;border-bottom:1px solid rgba(255,255,255,.08);font-size:.72rem}
+.analytics-time span{display:flex;gap:6px}.analytics-time b{font-weight:800}
+.analytics-columns{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:17px}
+.analytics-columns>div{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.025)}
+.analytics-columns h3,.analytics-hours h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:#fff}
+.analytics-bar{grid-template-columns:minmax(62px,auto) 1fr 30px;gap:8px;font-size:.7rem}
+.analytics-bar-track{height:9px;background:rgba(255,255,255,.075);box-shadow:inset 0 1px 2px rgba(0,0,0,.25)}
+.analytics-bar-track i{background:linear-gradient(90deg,var(--event-primary),var(--event-accent));box-shadow:0 0 12px rgba(236,72,153,.22)}
+.analytics-hours{margin-top:14px;padding:16px 14px 12px;border:1px solid rgba(255,255,255,.08);border-radius:16px;background:rgba(255,255,255,.025)}
+.hour-bars{height:155px;gap:7px;padding-top:8px}
+.hour-bar{min-width:38px;gap:5px}
+.hour-bar i{background:linear-gradient(180deg,var(--event-accent),var(--event-primary));box-shadow:0 0 13px rgba(236,72,153,.2)}
+.hour-bar b{font-size:.7rem;color:#fff}.hour-bar small{font-size:.62rem}
+.analytics-updated{margin-top:12px;font-size:.66rem;opacity:.8}
+.engagement-panel{margin-top:18px;padding:18px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:linear-gradient(145deg,rgba(99,102,241,.07),rgba(236,72,153,.045))}
+.engagement-head{margin-bottom:14px;align-items:center}
+.engagement-head small{font-size:.66rem;letter-spacing:.1em}.engagement-head h3{font-size:1rem}
+.engagement-head>strong{padding:7px 12px;border-radius:999px;background:rgba(236,72,153,.12);font-size:1.45rem;line-height:1;color:var(--event-accent)}
+.engagement-kpis{gap:9px}.engagement-kpis article{padding:13px 7px;border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.035)}
+.engagement-kpis b{font-size:1.5rem}.engagement-kpis small{font-size:.65rem}
+.engagement-funnel{margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,.07)}
+.funnel-row{grid-template-columns:105px 1fr 38px;gap:9px}
+.funnel-track{height:10px}.funnel-track i{box-shadow:0 0 12px rgba(236,72,153,.18)}
+.engagement-note{margin-top:12px;opacity:.78}
+@media(max-width:900px){.analytics-columns{grid-template-columns:1fr 1fr}.analytics-columns>div:last-child{grid-column:1/-1}}
+@media(max-width:680px){
+  .visitor-analytics{padding:17px}
+  .analytics-kpis{grid-template-columns:repeat(2,1fr);gap:9px}.analytics-kpis b{font-size:1.7rem}
+  .analytics-highlight{grid-template-columns:1fr;gap:6px}.analytics-highlight small{width:max-content}
+  .analytics-columns{grid-template-columns:1fr}.analytics-columns>div:last-child{grid-column:auto}
+  .analytics-time{flex-direction:column;gap:7px}.analytics-time span{justify-content:space-between}
+  .engagement-panel{padding:14px}.engagement-kpis{grid-template-columns:repeat(2,1fr)}
+  .engagement-head{align-items:flex-start}.engagement-head>strong{font-size:1.25rem}
 }
