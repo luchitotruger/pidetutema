@@ -1,0 +1,35 @@
+
+
+/* ===== V5.0.5.1 CONSOLIDACION VISUAL PERFIL + ANALYTICS ===== */
+/* Perfil Fiesta: restaura campo aprobado y botones gemelos debajo */
+.identity-editor{display:grid!important;grid-template-columns:140px 140px!important;grid-template-areas:"name name" "save anon"!important;justify-content:start;align-items:center;gap:8px;width:100%;margin-top:13px}
+#guestNickname{grid-area:name;width:100%;min-width:0;max-width:280px;min-height:58px;padding:14px 18px;font-size:19px;font-weight:750;line-height:1.2;letter-spacing:.01em;border-radius:15px;box-sizing:border-box}
+#guestNickname::placeholder{font-size:17px;font-weight:650}
+#saveGuestNickname{grid-area:save;margin-top:0!important}
+#clearGuestNickname{grid-area:anon}
+#saveGuestNickname,#clearGuestNickname{width:140px!important;min-height:48px;padding:11px 12px;border:0;border-radius:14px;color:#fff;background:linear-gradient(135deg,var(--event-primary),var(--event-secondary));box-shadow:0 8px 20px rgba(0,0,0,.18);font-size:14px;font-weight:850;line-height:1.15;text-align:center;white-space:normal;cursor:pointer}
+#saveGuestNickname:hover,#clearGuestNickname:hover{transform:translateY(-1px);filter:brightness(1.08)}
+
+/* Analytics: tres modulos hermanos con icono y jerarquia de Resumen en vivo */
+.analytics-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:15px}
+.analytics-columns>div{padding:14px 16px;border:1px solid var(--line);border-radius:17px;background:rgba(255,255,255,.03);box-shadow:none}
+.analytics-columns h3{display:flex;align-items:center;gap:8px;margin:0 0 14px;color:#fff;font-size:.72rem;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.analytics-columns>div:nth-child(1) h3::before{content:'📱';font-size:1.05rem}
+.analytics-columns>div:nth-child(2) h3::before{content:'🤖';font-size:1.05rem}
+.analytics-columns>div:nth-child(3) h3::before{content:'🌐';font-size:1.05rem}
+.analytics-bars{display:grid;gap:9px}
+.analytics-bar{display:grid;grid-template-columns:minmax(76px,auto) 1fr 30px;gap:9px;align-items:center;min-height:25px;font-size:.7rem}
+.analytics-bar>span:first-child{color:var(--muted);font-weight:700}
+.analytics-bar b{color:#fff;font-size:.75rem;text-align:right}
+.analytics-bar-track{height:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;box-shadow:none}
+.analytics-bar-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--event-primary),var(--event-accent));box-shadow:none}
+
+@media(max-width:700px){
+ .identity-editor{grid-template-columns:1fr 1fr!important;grid-template-areas:"name name" "save anon"!important}
+ #guestNickname{max-width:280px;min-height:60px;font-size:20px;padding:15px 16px}
+ #saveGuestNickname,#clearGuestNickname{width:100%!important;min-width:0;min-height:50px}
+ .analytics-columns{grid-template-columns:1fr;gap:9px;margin-top:11px}
+ .analytics-columns>div{padding:12px 13px;border-radius:14px}
+ .analytics-columns h3{margin-bottom:11px;font-size:.68rem}
+ .analytics-bar{grid-template-columns:72px minmax(70px,1fr) 28px;gap:7px;font-size:.66rem}
+}
