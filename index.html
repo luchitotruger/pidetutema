@@ -35,6 +35,16 @@
     <div id="connectionBar" class="connection online"><span class="dot"></span><span id="connectionText">Conectado en vivo</span></div>
 
     <section id="guest" class="guest-grid">
+      <!-- V5.0.1 IDENTIDAD OPCIONAL -->
+      <section id="guestIdentity" class="card guest-identity">
+        <div class="identity-copy"><small>TU PERFIL EN ESTA FIESTA</small><h2>👋 ¿Cómo quieres aparecer?</h2><p>Es opcional. Usa tu nombre o un apodo para personalizar tu experiencia.</p></div>
+        <div class="identity-editor">
+          <input id="guestNickname" maxlength="30" autocomplete="nickname" placeholder="Ej: Luchito 🔥">
+          <button id="saveGuestNickname" class="primary" type="button">Guardar nombre</button>
+          <button id="clearGuestNickname" class="ghost" type="button">Usar modo anónimo</button>
+        </div>
+        <div id="guestIdentityStatus" class="identity-status"></div>
+      </section>
       <form id="requestForm" class="card form-card">
         <span id="eventName" class="pill">TU FIESTA ✨</span>
         <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
