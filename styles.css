@@ -204,58 +204,23 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 /* ===== V5.0.3 RANKING INTELIGENTE ===== */
 .smart-ranking-card{position:relative;overflow:hidden;background:radial-gradient(circle at 100% 0,rgba(250,204,21,.10),transparent 30%),rgba(255,255,255,.025)}.smart-ranking-help{margin:4px 0 0;font-size:.72rem}.smart-score-legend{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.smart-score-legend span{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.04);font-size:.65rem;color:var(--muted)}.smart-ranking-notice{padding:14px 0;color:var(--muted);font-size:.76rem}.smart-ranking{display:grid;gap:9px}.smart-rank-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:rgba(255,255,255,.035)}.smart-rank-row:first-child{border-color:rgba(250,204,21,.28);background:linear-gradient(110deg,rgba(250,204,21,.10),rgba(236,72,153,.06))}.smart-position{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.07);font-size:1rem;font-weight:900}.smart-rank-row:first-child .smart-position{color:#fde68a;background:rgba(250,204,21,.12)}.smart-song{min-width:0}.smart-song strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smart-song small{display:block;margin-top:3px;color:var(--muted);font-size:.67rem}.smart-metrics{display:flex;gap:5px;justify-content:flex-end;flex-wrap:wrap;margin-top:6px}.smart-metrics span{font-size:.61rem;padding:3px 6px;border-radius:999px;background:rgba(255,255,255,.06)}.smart-score{text-align:right}.smart-score b{display:block;font-size:1.25rem;color:var(--event-accent)}.smart-score small{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}@media(max-width:600px){.smart-rank-row{grid-template-columns:34px minmax(0,1fr) 44px;padding:9px;gap:7px}.smart-position{width:32px;height:32px}.smart-score b{font-size:1rem}.smart-song strong{font-size:.82rem}.smart-metrics{justify-content:flex-start}.smart-score-legend{margin:9px 0}}
 
-/* ===== V5.0.4.1 LOOK & FEEL TU PERFIL FIESTA ===== */
-/* Campo de nombre/apodo: mayor jerarquia y mejor lectura */
+/* ===== V5.0.4.2 PERFIL FIESTA - CAMPO NOMBRE MAS LARGO ===== */
+.identity-editor {
+  grid-template-columns: minmax(420px, 1fr) auto auto;
+}
+
 #guestNickname {
-  min-height: 58px;
-  padding: 14px 18px;
-  font-size: 19px;
-  font-weight: 750;
-  line-height: 1.2;
-  letter-spacing: .01em;
-  border-radius: 15px;
+  width: 100%;
+  min-width: 420px;
+  box-sizing: border-box;
 }
 
-#guestNickname::placeholder {
-  font-size: 17px;
-  font-weight: 650;
-}
-
-/* Ambos botones comparten exactamente el mismo tratamiento visual */
-#saveGuestNickname,
-#clearGuestNickname {
-  min-height: 48px;
-  padding: 11px 16px;
-  border-radius: 14px;
-  font-size: 14px;
-  font-weight: 850;
-  align-self: center;
-}
-
-/* Igualamos Modo Anonimo al boton primario Guardar nombre */
-#clearGuestNickname {
-  color: #fff;
-  border-color: transparent;
-  background: linear-gradient(135deg,var(--event-primary),var(--event-secondary));
-  box-shadow: 0 8px 20px rgba(0,0,0,.18);
-}
-
-#clearGuestNickname:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.08);
-}
-
-@media (max-width: 700px) {
-  #guestNickname {
-    min-height: 60px;
-    padding: 15px 16px;
-    font-size: 20px;
+@media (max-width: 900px) {
+  .identity-editor {
+    grid-template-columns: 1fr;
   }
-  #guestNickname::placeholder { font-size: 17px; }
-  #saveGuestNickname,
-  #clearGuestNickname {
+  #guestNickname {
     width: 100%;
-    min-height: 50px;
-    font-size: 14px;
+    min-width: 0;
   }
 }
