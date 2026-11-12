@@ -274,3 +274,130 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
     min-width: 0;
   }
 }
+
+/* ===== V5.0.4.5 PANEL DJ - ANALYTICS + PARTICIPACION UNIFICADOS ===== */
+/* Inspirado en la lectura limpia de Resumen en vivo: menos cajas, mas jerarquia */
+.visitor-analytics{
+  padding:22px 24px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+  box-shadow:none;
+}
+.visitor-analytics .section-head{margin-bottom:18px;align-items:flex-start}
+.visitor-analytics .section-head small{color:var(--muted);font-size:.66rem;font-weight:900;letter-spacing:.1em}
+.visitor-analytics .section-head h2{margin:4px 0 0;font-size:1.28rem}
+.visitor-analytics #refreshAnalytics{flex:0 0 38px;width:38px;height:38px}
+
+/* KPIs sin cajas independientes */
+.analytics-kpis{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:8px 18px;
+  margin:4px 0 20px;
+}
+.analytics-kpis article{
+  min-height:0;
+  padding:6px 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  text-align:left;
+}
+.analytics-kpis article>span{font-size:1.25rem}
+.analytics-kpis b{margin:5px 0 2px;font-size:2rem;line-height:1;color:#fff}
+.analytics-kpis small{font-size:.67rem;color:var(--muted)}
+
+/* Hora peak como quinto KPI, visualmente integrado */
+.analytics-highlight{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:10px;
+  align-items:center;
+  margin:0 0 12px;
+  padding:12px 0;
+  border:0;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  border-radius:0;
+  background:transparent;
+}
+.analytics-highlight span{font-size:.68rem;color:#fde68a;letter-spacing:.06em}
+.analytics-highlight strong{font-size:1.02rem;color:#fff}
+.analytics-highlight small{padding:0;background:transparent;color:var(--muted)}
+.analytics-time{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:0;padding:8px 0 18px;border-bottom:1px solid var(--line);font-size:.72rem}
+.analytics-time span{display:block}.analytics-time b{display:block;margin-top:4px;font-size:.92rem;color:#fff}
+
+/* Tres columnas limpias */
+.analytics-columns{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:18px}
+.analytics-columns>div{padding:0;border:0;border-radius:0;background:transparent}
+.analytics-columns h3,.analytics-hours h3{margin:0 0 11px;font-size:.69rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
+.analytics-bars{gap:9px}
+.analytics-bar{grid-template-columns:minmax(62px,auto) 1fr 28px;gap:8px;font-size:.7rem}
+.analytics-bar-track{height:6px;background:rgba(255,255,255,.08);box-shadow:none}
+.analytics-bar-track i{background:linear-gradient(90deg,var(--event-primary),var(--event-accent));box-shadow:none}
+
+/* Grafico horario como bloque final, no tarjeta separada */
+.analytics-hours{margin-top:20px;padding:18px 0 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+.hour-bars{height:145px;gap:8px;padding:6px 0 0;justify-content:space-around}
+.hour-bar{min-width:34px}.hour-bar i{box-shadow:none}.hour-bar b{font-size:.67rem}.hour-bar small{font-size:.59rem}
+.analytics-updated{margin-top:10px;font-size:.64rem;color:var(--muted)}
+
+/* PARTICIPACION replica exactamente el lenguaje del bloque anterior */
+.engagement-panel{
+  margin-top:22px;
+  padding:20px 0 0;
+  border:0;
+  border-top:1px solid var(--line);
+  border-radius:0;
+  background:transparent;
+}
+.engagement-head{align-items:flex-start;margin-bottom:15px}
+.engagement-head small{color:var(--muted);font-size:.64rem;letter-spacing:.1em}
+.engagement-head h3{margin-top:4px;font-size:1.05rem}
+.engagement-head>strong{
+  padding:0;
+  border-radius:0;
+  background:transparent;
+  color:#fff;
+  font-size:2rem;
+  line-height:1;
+}
+.engagement-kpis{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px 18px}
+.engagement-kpis article{
+  min-height:0;
+  padding:7px 0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  text-align:left;
+}
+.engagement-kpis span{font-size:1.1rem}.engagement-kpis b{font-size:1.55rem;margin:5px 0 2px}.engagement-kpis small{font-size:.65rem;color:var(--muted)}
+.engagement-funnel{margin-top:18px;padding-top:17px;border-top:1px solid var(--line);gap:10px}
+.funnel-row{grid-template-columns:105px 1fr 38px;gap:10px;font-size:.7rem}
+.funnel-track{height:7px;background:rgba(255,255,255,.08)}.funnel-track i{box-shadow:none}
+.engagement-note{margin-top:13px;font-size:.64rem;color:var(--muted)}
+
+/* Notebook medio */
+@media (min-width:681px) and (max-width:1100px){
+  .visitor-analytics{padding:20px}
+  .analytics-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .analytics-columns{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .engagement-kpis{grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+}
+
+/* Celular: misma identidad, composicion 2 columnas */
+@media (max-width:680px){
+  .visitor-analytics{margin:0;padding:16px;border-radius:17px}
+  .visitor-analytics .section-head{margin-bottom:13px}.visitor-analytics .section-head h2{font-size:1.08rem}
+  .analytics-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;margin-bottom:13px}
+  .analytics-kpis article{min-height:72px;padding:5px 0}.analytics-kpis article>span{font-size:1.05rem}.analytics-kpis b{font-size:1.55rem}.analytics-kpis small{font-size:.61rem}
+  .analytics-highlight{grid-template-columns:1fr;gap:4px;padding:11px 0}.analytics-highlight small{width:auto}
+  .analytics-time{grid-template-columns:1fr 1fr;gap:12px;padding-bottom:14px}.analytics-time b{font-size:.8rem}
+  .analytics-columns{grid-template-columns:1fr;gap:16px;margin-top:15px}.analytics-columns>div,.analytics-columns>div:last-child{grid-column:auto;padding:0}
+  .analytics-hours{margin-top:16px;padding-top:15px;overflow:hidden}.hour-bars{height:120px;justify-content:flex-start;overflow-x:auto}
+  .engagement-panel{margin-top:18px;padding-top:17px}.engagement-head>strong{font-size:1.7rem}
+  .engagement-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 14px}.engagement-kpis article{min-height:65px;padding:5px 0}.engagement-kpis article:last-child{grid-column:auto}.engagement-kpis b{font-size:1.35rem}
+  .engagement-funnel{margin-top:14px;padding-top:14px}.funnel-row{grid-template-columns:80px minmax(65px,1fr) 28px;gap:7px;font-size:.65rem}
+}
