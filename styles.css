@@ -1002,3 +1002,91 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
     grid-template-columns:1fr;
   }
 }
+/* ===== V5.21.1 MOBILE ALIGNMENT HARDENING ===== */
+@media (max-width:900px){
+  /* Contenedor movil: ninguna tarjeta puede crecer mas que el viewport. */
+  html,body{max-width:100%;overflow-x:hidden}
+  #guest,#requestForm,#quickMusicStart,#recentSearchBlock,#popularSearchBlock{
+    width:100%;max-width:100%;min-width:0;box-sizing:border-box;
+  }
+  #requestForm{overflow:hidden}
+
+  /* Barra inferior: centrado por inset, sin left:50% + transform. */
+  .mobile-bottom-nav{
+    left:10px!important;
+    right:10px!important;
+    width:auto!important;
+    max-width:430px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Mini reproductor perfectamente alineado a la barra. */
+  .mobile-mini-player:not([hidden]){
+    left:10px!important;
+    right:10px!important;
+    width:auto!important;
+    max-width:430px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+  .mobile-mini-player:active{transform:scale(.985)!important}
+
+  /* Bottom sheet usa el mismo eje visual. */
+  .contextual-sheet:not([hidden]){
+    left:10px!important;
+    right:10px!important;
+    width:auto!important;
+    max-width:430px!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+    transform:none!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Recientes / Populares: grilla contenida, nunca scroll horizontal. */
+  .quick-music-start{
+    display:block!important;
+    overflow:hidden!important;
+  }
+  #recentSearchBlock,#popularSearchBlock{
+    display:block;
+    overflow:hidden!important;
+    margin-top:10px;
+  }
+  .quick-music-chips{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  .quick-music-chips button{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    min-height:44px;
+    margin:0!important;
+    padding:8px 9px!important;
+    box-sizing:border-box!important;
+    white-space:normal!important;
+    overflow:hidden!important;
+    overflow-wrap:anywhere!important;
+    word-break:break-word;
+    text-overflow:ellipsis;
+    line-height:1.15;
+    text-align:center!important;
+  }
+}
+@media (max-width:390px){
+  .quick-music-chips{grid-template-columns:1fr!important}
+}
