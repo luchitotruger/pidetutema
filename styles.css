@@ -694,3 +694,117 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
       "anon";
   }
 }
+
+/* ===== V5.0.4.8 PANEL DJ - ANALYTICS DASHBOARD ANCHO ===== */
+/* Notebook: aprovecha el ancho manteniendo el lenguaje visual de Resumen de la fiesta. */
+@media (min-width: 901px){
+  .visitor-analytics{padding:24px 26px}
+  #analyticsContent{
+    display:grid;
+    grid-template-columns:minmax(0,1.22fr) minmax(340px,.78fr);
+    grid-template-areas:
+      "kpis kpis"
+      "peak peak"
+      "time time"
+      "tech tech"
+      "hours engagement"
+      "updated updated";
+    gap:0 22px;
+    align-items:stretch;
+  }
+  #analyticsContent[hidden]{display:none}
+  #analyticsContent>.analytics-kpis{grid-area:kpis}
+  #analyticsContent>.analytics-highlight{grid-area:peak}
+  #analyticsContent>.analytics-time{grid-area:time}
+  #analyticsContent>.analytics-columns{grid-area:tech}
+  #analyticsContent>.analytics-hours{grid-area:hours}
+  #analyticsContent>.engagement-panel{grid-area:engagement}
+  #analyticsContent>.analytics-updated{grid-area:updated}
+
+  /* Tres tarjetas tecnicas alineadas como mini-resumenes. */
+  .analytics-columns{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+    margin:18px 0 0;
+  }
+  .analytics-columns>div{
+    min-width:0;
+    padding:16px 17px;
+    border:1px solid var(--line);
+    border-radius:17px;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+  }
+  .analytics-columns>div:nth-child(1){border-top:2px solid color-mix(in srgb,var(--event-accent) 72%,transparent)}
+  .analytics-columns>div:nth-child(2){border-top:2px solid color-mix(in srgb,var(--event-primary) 72%,transparent)}
+  .analytics-columns>div:nth-child(3){border-top:2px solid color-mix(in srgb,var(--event-secondary) 72%,transparent)}
+  .analytics-columns h3{margin:0 0 14px;font-size:.72rem;color:#fff;letter-spacing:.09em}
+  .analytics-bar{grid-template-columns:minmax(76px,auto) 1fr 32px;min-height:29px;gap:9px}
+  .analytics-bar-track{height:7px}
+  .analytics-bar>b{text-align:right}
+
+  /* Segunda fila: conexiones 60% + interaccion 40%. */
+  .analytics-hours,
+  .engagement-panel{
+    margin-top:14px;
+    min-width:0;
+    min-height:275px;
+    padding:18px;
+    border:1px solid var(--line);
+    border-radius:17px;
+    background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(255,255,255,.018));
+  }
+  .analytics-hours{display:flex;flex-direction:column}
+  .analytics-hours h3{margin-bottom:14px}
+  .hour-bars{flex:1;height:190px;min-height:165px;align-items:flex-end;justify-content:space-around;gap:8px;padding:8px 2px 0}
+  .hour-bar{min-width:34px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .hour-bar i{width:min(30px,72%);min-height:4px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--event-accent),var(--event-primary))}
+  .hour-bar b{margin-top:6px;font-size:.7rem}
+  .hour-bar small{font-size:.6rem;color:var(--muted)}
+
+  /* Interaccion en formato KPI al estilo Resumen en vivo. */
+  .engagement-panel{display:flex;flex-direction:column}
+  .engagement-head{margin:0 0 12px;padding:0 0 12px;border-bottom:1px solid var(--line)}
+  .engagement-head>strong{font-size:30px;color:var(--event-accent)}
+  .engagement-kpis{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px 16px;
+  }
+  .engagement-kpis article{min-height:64px;padding:7px 0;border:0;background:transparent}
+  .engagement-kpis article:last-child{grid-column:1/-1}
+  .engagement-kpis b{font-size:27px}
+  .engagement-kpis small{font-size:10.5px}
+  .engagement-funnel{margin-top:auto;padding-top:14px}
+  .funnel-row{grid-template-columns:96px minmax(80px,1fr) 32px;min-height:27px}
+
+  .analytics-updated{margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
+}
+
+/* Notebook medio: conserva 3 tarjetas arriba, pero apila la segunda fila si falta ancho real. */
+@media (min-width:901px) and (max-width:1120px){
+  #analyticsContent{
+    grid-template-columns:1fr;
+    grid-template-areas:
+      "kpis"
+      "peak"
+      "time"
+      "tech"
+      "hours"
+      "engagement"
+      "updated";
+  }
+  .analytics-hours,.engagement-panel{min-height:auto}
+  .hour-bars{height:165px}
+  .engagement-kpis{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .engagement-kpis article:last-child{grid-column:auto}
+}
+
+/* Celular: mantiene la lectura vertical ya validada. */
+@media (max-width:900px){
+  #analyticsContent{display:block}
+  #analyticsContent[hidden]{display:none}
+  .analytics-columns{grid-template-columns:1fr}
+  .analytics-columns>div:last-child{grid-column:auto}
+  .analytics-hours,.engagement-panel{min-height:0}
+}
