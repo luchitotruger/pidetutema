@@ -875,3 +875,56 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 
 /* ===== V5.10-V5.15 EXPERIENCIA FINAL ===== */
 .hub-head-actions{display:flex;gap:7px;align-items:center}.party-notification-button{position:relative;width:36px;height:32px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);color:#fff;cursor:pointer}.party-notification-button b{position:absolute;right:-4px;top:-6px;display:grid;place-items:center;min-width:18px;height:18px;border-radius:99px;background:#fb7185;font-size:.6rem}.notification-drawer{position:fixed;z-index:17000;right:12px;top:12px;bottom:12px;width:min(420px,calc(100% - 24px));padding:18px;border:1px solid var(--line);border-radius:22px;background:rgba(20,12,38,.98);box-shadow:0 30px 90px rgba(0,0,0,.58);overflow:auto}.notification-drawer[hidden]{display:none}.notification-drawer-head{display:flex;justify-content:space-between;align-items:start}.notification-drawer-head small{color:#c4b5fd;font-weight:900;letter-spacing:.1em}.notification-drawer-head h2{margin:4px 0 12px}.notification-drawer-head button,.achievement-celebration-card>button{border:0;background:transparent;color:#fff;font-size:1.7rem;cursor:pointer}.notification-list{display:grid;gap:8px;margin-bottom:12px}.notification-item{display:grid;grid-template-columns:38px 1fr;gap:9px;padding:11px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}.notification-item.unread{border-color:color-mix(in srgb,var(--event-accent) 38%,var(--line));background:color-mix(in srgb,var(--event-primary) 9%,transparent)}.notification-item>span{font-size:1.35rem}.notification-item b,.notification-item small{display:block}.notification-item small{margin-top:3px;color:var(--muted)}.achievement-celebration{position:fixed;inset:0;z-index:17500;display:grid;place-items:center;padding:18px;background:rgba(3,1,10,.86);backdrop-filter:blur(10px)}.achievement-celebration[hidden]{display:none}.achievement-celebration-card{position:relative;width:min(390px,100%);padding:28px;text-align:center;border:1px solid rgba(250,204,21,.4);border-radius:26px;background:linear-gradient(150deg,#321950,#130c25)}.achievement-celebration-card>button{position:absolute;right:12px;top:8px}.achievement-celebration-card>span{font-size:4rem}.achievement-celebration-card small{display:block;color:#fde68a;font-weight:900;letter-spacing:.13em}.achievement-celebration-card h2{margin:8px 0}.achievement-celebration-card strong{color:#a7f3d0}.my-night-card{border-color:color-mix(in srgb,var(--event-secondary) 30%,var(--line))}.my-night-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.my-night-kpis article{text-align:center;padding:11px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}.my-night-kpis b,.my-night-kpis small{display:block}.my-night-kpis b{font-size:1.35rem}.my-night-kpis small{color:var(--muted);font-size:.62rem}.my-night-song{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px}.my-night-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.my-night-actions .primary{margin:12px 0 0}.my-night-actions .tool-button{margin-top:12px;border-radius:14px}.recommendations-list{display:grid;gap:8px}.recommendation-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:13px}.recommendation-row b,.recommendation-row small{display:block}.recommendation-row small{color:var(--muted)}.recommendation-row button{border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.05);color:#fff;padding:8px;cursor:pointer}.close-party-button{border-color:rgba(251,113,133,.35)!important}.party-closed-banner{padding:17px;text-align:center;border:1px solid rgba(250,204,21,.3);border-radius:16px;background:rgba(250,204,21,.07)}@media(max-width:600px){.my-night-kpis{grid-template-columns:repeat(2,1fr)}.my-night-actions{grid-template-columns:1fr}}
+
+
+/* ===== V5.15.1 MOBILE UX ORDEN FINAL ===== */
+/* Invitados = 100% Mobile First. No cambia Panel DJ ni Proyector. */
+@media(max-width:900px){
+  body #guest{display:flex!important;flex-direction:column!important;gap:14px!important;max-width:680px;margin-inline:auto}
+  #guest>*{min-width:0}
+
+  /* Wrappers invitados pasan a ser transparentes para poder ordenar sus tarjetas. */
+  #guest .guest-side,#guest .live-interaction-guest{display:contents!important}
+
+  /* 1 Perfil */
+  #guest>:has(#guestIdentity),#guest #guestIdentity{order:10}
+  /* 2 Pedir canción */
+  #guest>:has(#requestForm),#guest #requestForm{order:20}
+  /* 3 Ranking */
+  #guest>:has(#ranking),#guest .ranking-card{order:30}
+  /* 4 Sonando + Reacciones */
+  #guest>:has(#nowPlaying),#guest #nowPlaying{order:40}
+  #guest>:has(#liveReactions),#guest #liveReactions{order:41}
+  /* 5 Tu Fiesta */
+  #guest>:has(#myPartyHub),#guest #myPartyHub{order:50}
+  /* 6 Mis canciones */
+  #guest>:has(#mySongsCard),#guest #mySongsCard{order:60}
+  /* 7 Participa ahora */
+  #guest>:has(#nextUpCard),#guest #nextUpCard{order:70}
+  #guest>:has(#trendsCard),#guest #trendsCard{order:71}
+  #guest>:has(#battleGuestCard),#guest #battleGuestCard{order:72}
+  #guest>:has(#challengeGuestCard),#guest #challengeGuestCard{order:73}
+  #guest>:has(#djSurpriseGuestCard),#guest #djSurpriseGuestCard{order:74}
+  /* 8 Recomendaciones */
+  #guest>:has(#recommendationsCard),#guest #recommendationsCard{order:80}
+  /* 9 Logros */
+  #guest>:has(#achievementsCard),#guest #achievementsCard{order:90}
+  /* 10 Mi actividad */
+  #guest>:has(#guestActivity),#guest #guestActivity{order:100}
+  /* 11 Evaluación */
+  #guest>:has(#djFeedbackCard),#guest #djFeedbackCard{order:110}
+  /* 12 Mi Noche: solo visible cuando lógica V5.15 la habilita */
+  #guest>:has(#myNightCard),#guest #myNightCard{order:120}
+
+  /* Primeros tres bloques con separación visual más clara. */
+  #guestIdentity,#requestForm,.ranking-card{scroll-margin-top:12px}
+  #requestForm{box-shadow:0 14px 34px rgba(0,0,0,.20)}
+  .ranking-card{box-shadow:0 12px 30px rgba(0,0,0,.16)}
+
+  /* Secundarios más compactos. */
+  #achievementsCard,#guestActivity,#djFeedbackCard,#recommendationsCard{padding:16px!important}
+
+  /* Mantener ranking corto por defecto. */
+  #ranking .song:nth-child(n+7){display:none}
+  .ranking-card.show-full-ranking #ranking .song{display:flex}
+}
