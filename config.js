@@ -3,5 +3,6 @@
 window.APP_CONFIG = {
   SUPABASE_URL:'https://fycsqkdxbizgkdcqeoik.supabase.co',
   SUPABASE_PUBLISHABLE_KEY:'sb_publishable_wWRjD_wX1uqj6TRYi-Ja6g_wJesh4fy',
-  EVENT_SLUG: "cumple-carolina"
+  EVENT_SLUG: "cumple-carolina",
+  VAPID_PUBLIC_KEY:'BIdlkeY8EhU8WiZ82wEARuhXUMhKZNwWvZCWhiknUnFphaYo2sCBkCP_rvWQn9WAh3alcz8lWFTG03wlJ8a4O0E'
 };
