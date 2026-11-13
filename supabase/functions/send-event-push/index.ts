@@ -12,13 +12,19 @@ Deno.serve(async(req)=>{
   const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   const admin=createClient(supabaseUrl,service)
 
-  const {data:{user},error:ue}=await admin.auth.getUser(token)
-  if(ue||!user){
-    console.error('SEND_EVENT_PUSH_AUTH_ERROR:',ue?.message||'Usuario no encontrado')
-    throw new Error('DJ no autenticado')
-  }
+  const parts=token.split('.')
+  if(parts.length!==3)throw new Error('Token DJ inválido')
 
-  console.log('SEND_EVENT_PUSH_AUTH_OK:',user.id)
+  const jwtPayload=JSON.parse(
+    atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))
+  )
+
+  if(!jwtPayload.sub)throw new Error('JWT DJ sin usuario')
+  if(jwtPayload.role!=='authenticated')throw new Error('Usuario DJ no autenticado')
+
+  const userId=jwtPayload.sub
+
+  console.log('SEND_EVENT_PUSH_AUTH_OK:',userId)
 
   const body=await req.json()
   const {
@@ -29,7 +35,7 @@ Deno.serve(async(req)=>{
     sound_enabled=true
   }=body
   if(!event_id||!String(message||'').trim())throw new Error('Faltan evento o mensaje')
-  const {data:event,error:ee}=await admin.from('events').select('id,slug,owner_id').eq('id',event_id).single();if(ee||!event)throw new Error('Evento no encontrado');if(event.owner_id!==user.id)throw new Error('No eres propietario del evento')
+  const {data:event,error:ee}=await admin.from('events').select('id,slug,owner_id').eq('id',event_id).single();if(ee||!event)throw new Error('Evento no encontrado');if(event.owner_id!==userId)throw new Error('No eres propietario del evento')
   const {data:announcement,error:ae}=await admin.from('event_announcements').insert({event_id,message:String(message).trim().slice(0,240),priority,duration_seconds,sound_enabled,is_active:true,expires_at:Number(duration_seconds)>0?new Date(Date.now()+Number(duration_seconds)*1000).toISOString():null}).select('id').single();if(ae)throw ae
   const {data:subs,error:se}=await admin.from('event_push_subscriptions').select('id,endpoint,p256dh,auth').eq('event_id',event_id).eq('is_active',true);if(se)throw se
   webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT')!,Deno.env.get('VAPID_PUBLIC_KEY')!,Deno.env.get('VAPID_PRIVATE_KEY')!)
