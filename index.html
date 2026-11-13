@@ -70,6 +70,14 @@
       </section>
       <!-- V5.1 MIS LOGROS -->
 <section id="achievementsCard" class="card achievements-card"><div class="section-head"><div><small>GAMIFICACIÓN PERSONAL</small><h2>🏅 Mis logros</h2></div><span id="achievementCount" class="achievement-count">0/6</span></div><p class="muted achievement-help">Participa en la fiesta y desbloquea insignias.</p><div id="achievementProgress" class="achievement-progress"><i></i></div><div id="achievementsList" class="achievements-list"></div></section>
+        <!-- V5.2-V5.6 EXPERIENCIA INTERACTIVA -->
+<section id="liveInteractionGuest" class="live-interaction-guest">
+  <section id="nextUpCard" class="card interaction-card" hidden><div class="section-head"><div><small>V5.2 · DECIDE LA FIESTA</small><h2>⏭️ ¿Qué debería sonar después?</h2></div><span class="live-chip">EN VIVO</span></div><p class="muted">Vota por tu favorita. El DJ siempre tiene la decisión final.</p><div id="nextUpList" class="next-up-list"></div></section>
+  <section id="trendsCard" class="card interaction-card" hidden><div class="section-head"><div><small>V5.3 · MOVIMIENTO RECIENTE</small><h2>🔥 Tendencias en vivo</h2></div></div><div id="trendsList" class="trends-grid"></div></section>
+  <section id="battleGuestCard" class="card interaction-card battle-card" hidden><div class="section-head"><div><small>V5.4 · DUELO ACTIVO</small><h2>⚔️ Batalla de la pista</h2></div><strong id="battleTimer" class="battle-timer">00:00</strong></div><div id="battleGuestContent" class="battle-versus"></div></section>
+  <section id="challengeGuestCard" class="card interaction-card challenge-card" hidden><div class="section-head"><div><small>V5.5 · OBJETIVO COLECTIVO</small><h2>⚡ Reto de la fiesta</h2></div></div><strong id="challengeTitle"></strong><div class="challenge-progress"><i id="challengeProgress"></i></div><div id="challengeMeta" class="challenge-meta"></div></section>
+  <section id="djSurpriseGuestCard" class="card interaction-card surprise-dj-card"><div class="section-head"><div><small>V5.6 · DEJA QUE EL DJ DECIDA</small><h2>🎁 Sorpresa del DJ</h2></div></div><p class="muted">Pide una selección especial para ti o tu mesa.</p><div class="surprise-dj-form"><select id="djSurprisePreference"><option value="libre">Elección libre del DJ</option><option value="bailable">Bailable</option><option value="cumbia">Cumbia</option><option value="reggaeton">Reggaetón</option><option value="cantar">Para cantar</option><option value="retro">Retro</option></select><button id="requestDjSurprise" class="primary" type="button">🎁 QUIERO UNA SORPRESA</button></div><div id="djSurpriseStatus" class="interaction-status"></div></section>
+</section>
         <form id="requestForm" class="card form-card">
         <span id="eventName" class="pill">TU FIESTA ✨</span>
         <h2>¿Qué quieres bailar?</h2><p class="muted">Pide una canción o dale corazón a una que ya esté en el ranking.</p>
@@ -118,7 +126,14 @@
       </section>
       <div class="dj-tools"><button id="enableNotifications" class="tool-button">🔔 Activar notificaciones</button><button id="toggleSound" class="tool-button active">🔊 Sonido activado</button><button id="highlightDedication" class="tool-button dedication-control" type="button" disabled>💬 Destacar dedicatoria</button><button id="clearProjectedDedication" class="tool-button" type="button" disabled>↩ Volver a Sonando</button><button id="openScreenMode" class="tool-button" type="button">📺 Abrir Pantalla Fiesta</button><input id="djSearch" class="search" placeholder="Buscar canción, artista o invitado"></div>
       <div class="stats"><div class="card"><b id="nRequests">0</b><span>Pedidos</span></div><div class="card"><b id="nVotes">0</b><span>Votos</span></div><div class="card"><b id="nQueue">0</b><span>En lista</span></div></div>
-      <!-- V4.5.2 DASHBOARD ANALYTICS -->
+      <!-- V5.2-V5.6 CONTROL INTERACCION -->
+<section class="card live-control-card"><div class="section-head"><div><small>INTERACCIÓN EN VIVO</small><h2>🎮 Experiencias de la fiesta</h2></div><button id="refreshLiveControl" class="icon-button" type="button">↻</button></div>
+<div class="live-control-grid">
+  <article><h3>⚔️ Batalla</h3><select id="battleSongA"></select><select id="battleSongB"></select><select id="battleDuration"><option value="60">1 minuto</option><option value="120" selected>2 minutos</option><option value="180">3 minutos</option><option value="300">5 minutos</option></select><div class="control-actions"><button id="startBattle" class="tool-button" type="button">Iniciar</button><button id="endBattle" class="tool-button" type="button" disabled>Finalizar</button></div><div id="battleAdminStatus" class="interaction-status"></div></article>
+  <article><h3>⚡ Reto</h3><input id="challengeName" maxlength="80" placeholder="Ej: ¡Lleguemos a 100 votos!"><select id="challengeType"><option value="votes">Votos totales</option><option value="requests">Solicitudes</option><option value="played">Canciones reproducidas</option></select><input id="challengeTarget" type="number" min="1" max="9999" value="100"><div class="control-actions"><button id="startChallenge" class="tool-button" type="button">Activar</button><button id="endChallenge" class="tool-button" type="button" disabled>Cerrar</button></div><div id="challengeAdminStatus" class="interaction-status"></div></article>
+  <article><h3>🎁 Sorpresas</h3><div id="surpriseAdminList" class="surprise-admin-list"></div></article>
+</div></section>
+        <!-- V4.5.2 DASHBOARD ANALYTICS -->
       <section class="card visitor-analytics" aria-labelledby="visitorAnalyticsTitle">
         <div class="section-head"><div><small>ANALYTICS DE INVITADOS</small><h2 id="visitorAnalyticsTitle">📊 Conexiones del evento</h2></div><button id="refreshAnalytics" class="icon-button" type="button" aria-label="Actualizar estadísticas">↻</button></div>
         <div id="analyticsNotice" class="analytics-notice">Cargando estadísticas…</div>
