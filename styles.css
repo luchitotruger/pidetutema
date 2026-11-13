@@ -1002,11 +1002,8 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
     grid-template-columns:1fr;
   }
 }
-<<<<<<< HEAD
-=======
 
 
->>>>>>> 68ce5f4 (V5.21.1 fix mobile alignment)
 /* ===== V5.21.1 MOBILE ALIGNMENT HARDENING ===== */
 @media (max-width:900px){
   /* Contenedor movil: ninguna tarjeta puede crecer mas que el viewport. */
