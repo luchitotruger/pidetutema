@@ -941,3 +941,13 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
   #mobileContextBadge{position:absolute;right:9px;top:6px;display:grid;place-items:center;min-width:17px;height:17px;padding:0 3px;border-radius:99px;background:#fb7185;color:#fff;font-size:.55rem;font-style:normal;font-weight:900}#mobileContextBadge[hidden]{display:none}
   body.screen-active .mobile-bottom-nav,#dj:not([hidden])~.mobile-bottom-nav{display:none!important}
 }
+
+
+/* ===== V5.16.1 MINI REPRODUCTOR FLOTANTE ===== */
+.mobile-mini-player{display:none}
+@media(max-width:900px){
+  .mobile-mini-player:not([hidden]){position:fixed;z-index:13990;left:50%;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 68px);transform:translateX(-50%);display:grid;grid-template-columns:46px minmax(0,1fr) 34px;gap:10px;align-items:center;width:min(430px,calc(100% - 20px));min-height:64px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--event-accent) 30%,rgba(255,255,255,.14));border-radius:17px;background:rgba(17,10,31,.94);color:#fff;text-align:left;backdrop-filter:blur(18px);box-shadow:0 14px 38px rgba(0,0,0,.44);cursor:pointer;touch-action:manipulation}
+  .mobile-mini-cover{display:grid;place-items:center;width:46px;height:46px;border-radius:11px;overflow:hidden;background:linear-gradient(135deg,var(--event-primary),var(--event-secondary));font-size:1.35rem}.mobile-mini-cover img{width:100%;height:100%;object-fit:cover}.mobile-mini-copy{min-width:0}.mobile-mini-copy small,.mobile-mini-copy b,.mobile-mini-copy>span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mobile-mini-copy small{color:var(--event-accent);font-size:.55rem;font-weight:900;letter-spacing:.08em}.mobile-mini-copy b{margin-top:2px;font-size:.77rem}.mobile-mini-copy>span{color:var(--muted);font-size:.62rem;margin-top:2px}.mobile-mini-react{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:rgba(249,115,22,.10);font-size:1.05rem}.mobile-mini-player:active{transform:translateX(-50%) scale(.985)}
+  body.screen-active .mobile-mini-player,#dj:not([hidden])~.mobile-mini-player{display:none!important}
+  body:has(.mobile-mini-player:not([hidden])):not(.screen-active){padding-bottom:154px}
+}
