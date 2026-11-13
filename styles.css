@@ -955,3 +955,30 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 /* ===== V5.17-V5.21 MOBILE FIRST ===== */
 .contextual-sheet{display:none}.quick-music-start{display:grid;gap:9px;margin:8px 0}.quick-music-start small{display:block;margin-bottom:5px;color:var(--muted);font-size:.62rem;font-weight:900;letter-spacing:.08em}.quick-music-chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.quick-music-chips button{flex:0 0 auto;max-width:180px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);color:#ddd6fe;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:.68rem}.install-pwa{display:block;width:max-content;max-width:100%;margin:0 0 8px auto;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.05);color:#fff;padding:8px 11px;font-size:.7rem}.install-pwa[hidden]{display:none}.connection.reconnecting{color:#fde68a}.connection.reconnecting .dot{background:#facc15;box-shadow:0 0 10px #facc15}.offline-stale::after{content:'Vista guardada · puede estar desactualizada';display:block;position:fixed;z-index:13800;left:50%;top:10px;transform:translateX(-50%);width:max-content;max-width:calc(100% - 24px);padding:7px 11px;border-radius:999px;background:rgba(127,29,29,.95);color:#fecaca;font-size:.65rem;font-weight:900}
 @media(max-width:900px){.contextual-sheet:not([hidden]){position:fixed;z-index:14500;left:50%;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 142px);transform:translateX(-50%);display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;width:min(430px,calc(100% - 20px));padding:13px 14px;border:1px solid color-mix(in srgb,var(--event-accent) 38%,var(--line));border-radius:19px;background:rgba(27,14,47,.98);box-shadow:0 20px 54px rgba(0,0,0,.52);backdrop-filter:blur(18px)}.contextual-sheet>span{display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,var(--event-primary),var(--event-secondary));font-size:1.35rem}.contextual-sheet small,.contextual-sheet h3,.contextual-sheet p{display:block;margin:0}.contextual-sheet small{color:var(--event-accent);font-size:.55rem;font-weight:900;letter-spacing:.08em}.contextual-sheet h3{margin-top:2px;font-size:.82rem}.contextual-sheet p{margin-top:2px;color:var(--muted);font-size:.65rem}.contextual-go{border:0;border-radius:11px;background:rgba(255,255,255,.08);color:#fff;padding:9px;font-size:.65rem;font-weight:900}.contextual-close{position:absolute;right:5px;top:-9px;width:25px;height:25px;border:1px solid var(--line);border-radius:50%;background:#160e28;color:#fff}.install-pwa{margin-right:auto}.quick-music-chips button{min-height:40px}.my-party-hub{scroll-margin-top:12px}}
+* ===== FIX MOBILE BAR CENTERING ===== */
+@media(max-width:900px){
+  .mobile-bottom-nav{
+    left:10px !important;
+    right:10px !important;
+    width:auto !important;
+    max-width:430px !important;
+    margin-inline:auto !important;
+    transform:none !important;
+    box-sizing:border-box !important;
+  }
+
+  /* El mini reproductor usa exactamente el mismo eje/ancho. */
+  .mobile-mini-player:not([hidden]){
+    left:10px !important;
+    right:10px !important;
+    width:auto !important;
+    max-width:430px !important;
+    margin-inline:auto !important;
+    transform:none !important;
+    box-sizing:border-box !important;
+  }
+
+  .mobile-mini-player:active{
+    transform:scale(.985) !important;
+  }
+}
