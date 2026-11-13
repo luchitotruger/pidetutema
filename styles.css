@@ -824,3 +824,51 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 
 /* ===== V5.9 REACCIONES EN VIVO - MOBILE FIRST ===== */
 .live-reactions{border-color:color-mix(in srgb,#f97316 36%,var(--line));background:linear-gradient(145deg,rgba(249,115,22,.07),rgba(25,15,48,.9))}.reaction-energy{padding:6px 9px;border-radius:999px;background:rgba(249,115,22,.12);color:#fdba74;font-weight:900}.reaction-song{color:#ddd6fe;font-size:.78rem;margin:5px 0 12px}.reaction-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}.reaction-buttons button{display:grid;place-items:center;min-width:0;min-height:78px;padding:8px 3px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.04);color:#fff;touch-action:manipulation;cursor:pointer}.reaction-buttons button span{font-size:1.65rem}.reaction-buttons button b{font-size:.9rem}.reaction-buttons button small{color:var(--muted);font-size:.58rem}.reaction-buttons button.active{border-color:var(--event-accent);background:linear-gradient(135deg,color-mix(in srgb,var(--event-primary) 18%,transparent),color-mix(in srgb,var(--event-secondary) 12%,transparent));transform:translateY(-2px)}.reaction-dashboard{margin:18px 0}.reaction-dj-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.reaction-dj-grid article{text-align:center;padding:13px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035)}.reaction-dj-grid strong,.reaction-dj-grid small{display:block}.reaction-dj-grid strong{font-size:1.65rem}.reaction-dj-grid small{color:var(--muted);font-size:.68rem}.reaction-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}.reaction-breakdown div{text-align:center;padding:9px;border-radius:12px;background:rgba(255,255,255,.03)}.reaction-top-songs{margin-top:12px}.reaction-top-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px;border-top:1px solid var(--line)}.screen-reactions{position:absolute;left:50%;bottom:7%;z-index:3;transform:translateX(-50%);display:flex;gap:16px;padding:9px 16px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(9,4,20,.72);backdrop-filter:blur(10px);font-size:clamp(1rem,1.8vw,1.5rem);font-weight:900}.screen-reactions[hidden]{display:none}@media(max-width:520px){.reaction-buttons{gap:5px}.reaction-buttons button{min-height:74px}.reaction-buttons button small{font-size:.55rem}}@media(max-width:900px){.reaction-dj-grid,.reaction-breakdown{grid-template-columns:repeat(2,1fr)}}
+
+
+/* ===== V5.9.2 MOBILE UX - ORDEN INVITADOS ===== */
+/* Mobile First: perfil -> pedir -> ranking -> sonando/reacciones -> Tu Fiesta -> Mis canciones -> participa -> logros/actividad -> evaluar */
+@media(max-width:900px){
+  body #guest{display:flex!important;flex-direction:column!important;gap:14px!important;max-width:680px;margin-inline:auto}
+  /* Elementos directos y wrappers actuales. El :has permite ordenar sin reconstruir HTML/JS. */
+  #guest>*{min-width:0}
+  #guest>:has(#guestIdentity),#guest #guestIdentity{order:10}
+  #guest>:has(#requestForm),#guest #requestForm{order:20}
+  #guest>:has(#ranking),#guest .ranking-card{order:30}
+  #guest>:has(#nowPlaying),#guest #nowPlaying{order:40}
+  #guest>:has(#liveReactions),#guest #liveReactions{order:41}
+  #guest>:has(#myPartyHub),#guest #myPartyHub{order:50}
+  #guest>:has(#mySongsCard),#guest #mySongsCard{order:60}
+  #guest>:has(#nextUpCard),#guest>:has(#trendsCard),#guest>:has(#battleGuestCard),#guest>:has(#challengeGuestCard),#guest>:has(#djSurpriseGuestCard){order:70}
+  #guest #nextUpCard,#guest #trendsCard,#guest #battleGuestCard,#guest #challengeGuestCard,#guest #djSurpriseGuestCard{order:70}
+  #guest>:has(#achievementsCard),#guest #achievementsCard{order:80}
+  #guest>:has(#guestActivity),#guest #guestActivity{order:81}
+  #guest>:has(#djFeedbackCard),#guest #djFeedbackCard{order:90}
+
+  /* En móvil, asegurar que wrappers que agrupan varias tarjetas no bloqueen el orden visual interno. */
+  #guest .guest-side,#guest .live-interaction-guest{display:contents!important}
+
+  /* Perfil compacto y primera acción visible. */
+  #guestIdentity{padding-block:15px!important}
+  #guestIdentity .section-head{margin-bottom:6px}
+
+  /* Pedir canción: protagonista táctil. */
+  #requestForm{padding:18px!important}
+  #requestForm .primary{min-height:52px;font-size:.92rem}
+  #requestForm input,#requestForm select,#requestForm textarea{min-height:46px}
+
+  /* Ranking: Top visible pero filas compactas. */
+  .ranking-card{padding:17px!important}
+  #ranking .song{padding:11px!important}
+  #ranking .song:nth-child(n+7){display:none}
+  .ranking-card.show-full-ranking #ranking .song{display:flex}
+  .mobile-ranking-more{display:block;width:100%;margin-top:9px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.04);color:#ddd6fe;padding:10px;font-weight:800}
+
+  /* Tu Fiesta mantiene prioridad, secundarios más compactos. */
+  .achievements-card,.guest-activity{padding:16px!important}
+  .achievements-list{grid-template-columns:1fr!important}
+
+  /* Evaluación al final, cómoda para pulgar. */
+  .dj-feedback-card{margin-bottom:8px}
+}
+@media(min-width:901px){.mobile-ranking-more{display:none!important}}
