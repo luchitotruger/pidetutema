@@ -103,8 +103,55 @@ async function loadPartyPhotos(){if(!db||!eventId)return;if(!session){return}con
 async function moderatePartyPhoto(id,status){const {error}=await db.rpc('moderate_party_photo_v5301',{p_photo_id:id,p_status:status});if(error){toast('No se pudo moderar',error.message,'error');return}toast(status==='approved'?'✅ Foto aprobada':'❌ Foto rechazada','',status==='approved'?'success':'info');await loadPartyPhotos()}
 async function projectPartyPhoto(id){const x=partyPhotoState.approved.find(p=>p.id===id);if(!x){toast('Foto no disponible','','error');return}const {error}=await db.rpc('project_party_photo_v5302',{p_event_id:eventId,p_photo_id:id,p_seconds:15});if(error){toast('No se pudo proyectar',error.message,'error');return}toast('🎬 Foto enviada a Pantalla Fiesta','Se mostrará durante 15 segundos','success');await syncProjectedPhoto()}
 async function clearProjectedPartyPhoto(){const {error}=await db.rpc('clear_projected_photo_v5302',{p_event_id:eventId});if(error){toast('No se pudo quitar',error.message,'error');return}toast('⏹ Foto retirada de Pantalla Fiesta','','success');hideProjectedPartyPhoto()}
-function hideProjectedPartyPhoto(){if(el.screenPartyPhoto)el.screenPartyPhoto.hidden=true;if(el.screenPartyPhotoImg)el.screenPartyPhotoImg.removeAttribute('src');clearTimeout(partyPhotoState.projectTimer)}
-async function syncProjectedPhoto(){if(!db||!eventId||!el.screenPartyPhoto)return;const {data,error}=await db.rpc('get_projected_photo_v5302',{p_event_id:eventId});if(error||!data){hideProjectedPartyPhoto();return}const url=await signedPartyPhoto(data.storage_path);if(!url){hideProjectedPartyPhoto();return}el.screenPartyPhotoImg.src=url;el.screenPartyPhoto.hidden=false;clearTimeout(partyPhotoState.projectTimer);const ms=Math.max(0,new Date(data.until).getTime()-Date.now());partyPhotoState.projectTimer=setTimeout(hideProjectedPartyPhoto,ms||15000)}
+function hideProjectedPartyPhoto(){
+  if(el.screenPartyPhoto)el.screenPartyPhoto.hidden=true;
+  if(el.screenPartyPhotoImg)el.screenPartyPhotoImg.removeAttribute('src');
+
+  clearTimeout(partyPhotoState.projectTimer);
+  partyPhotoState.projectTimer=null;
+
+  if(screenModeActive&&partyScreen.auto&&!partyScreen.timer){
+    partyRestartTimer();
+  }
+}
+async function syncProjectedPhoto(){
+  if(!db||!eventId||!el.screenPartyPhoto)return;
+
+  const {data,error}=await db.functions.invoke('get-projected-photo',{
+    body:{event_id:eventId}
+  });
+
+  if(error||!data?.ok||!data?.photo){
+    hideProjectedPartyPhoto();
+    return;
+  }
+
+  const photo=data.photo;
+
+  el.screenPartyPhotoImg.src=photo.url;
+  el.screenPartyPhoto.hidden=false;
+
+  // La foto tiene prioridad absoluta sobre el carrusel.
+  clearInterval(partyScreen.timer);
+  partyScreen.timer=null;
+
+  clearTimeout(partyPhotoState.projectTimer);
+
+  const ms=Math.max(
+    0,
+    new Date(photo.until).getTime()-Date.now()
+  );
+
+  partyPhotoState.projectTimer=setTimeout(()=>{
+    hideProjectedPartyPhoto();
+
+    // Reanudar automaticamente el carrusel.
+    if(screenModeActive&&partyScreen.auto){
+      partyRestartTimer();
+      partyAdvance(1);
+    }
+  },ms||15000);
+}
 async function loadAnnouncements(){if(!db||!eventId)return;const {data,error}=await db.rpc('get_announcements_v523',{p_event_id:eventId,p_visitor_id:visitorToken});if(error){console.warn('Avisos V5.23:',error.message);return}const d=data||{};announcementState.active=d.active||null;if(!session&&announcementState.active&&announcementState.active.id!==announcementState.shownId)showAnnouncement(announcementState.active);if(session)renderAnnouncementHistory(d.history||[])}
 function showAnnouncement(a){announcementState.shownId=a.id;clearTimeout(announcementState.timer);clearTimeout(announcementState.reminder);el.announcementCard.className=`announcement-card ${a.priority}`;el.announcementOverlayIcon.textContent=announcementIcon(a.priority);el.announcementOverlayKicker.textContent=a.priority==='urgent'?'AVISO URGENTE':a.priority==='important'?'AVISO IMPORTANTE':'AVISO DEL DJ';el.announcementOverlayMessage.textContent=a.message;el.announcementOverlayHint.textContent='Luis DJ · Atención a la fiesta';el.announcementOverlay.hidden=false;vibrateParty(announcementPattern(a.priority));if(a.sound_enabled)playAnnouncementTone(a.priority);db.rpc('mark_announcement_seen_v523',{p_announcement_id:a.id,p_visitor_id:visitorToken}).catch(()=>{});addPartyNotification('announcement',el.announcementOverlayKicker.textContent,a.message);const ms=Number(a.duration_seconds)||0;if(ms>0)announcementState.timer=setTimeout(()=>{el.announcementOverlay.hidden=true},ms*1000);if(a.priority!=='general')announcementState.reminder=setTimeout(()=>{if(!el.announcementOverlay.hidden){vibrateParty(a.priority==='urgent'?[300,120,400]:[180,100,180]);if(a.sound_enabled)playAnnouncementTone('general')}},5000)}
 async function acknowledgeAnnouncement(){const a=announcementState.active;if(!a)return;const {error}=await db.rpc('ack_announcement_v523',{p_announcement_id:a.id,p_visitor_id:visitorToken});if(error)return;clearTimeout(announcementState.timer);clearTimeout(announcementState.reminder);el.announcementOverlay.hidden=true;haptic('reaction')}
