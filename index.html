@@ -8,12 +8,12 @@
   <link rel="preconnect" href="https://itunes.apple.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=5.31.2">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div class="ambient one"></div><div class="ambient two"></div>
-  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+  <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div><aside id="appUpdateBanner" class="app-update-banner" hidden><div><span>🔄</span><p><strong>Nueva versión disponible</strong><small>Pide Tu Tema tiene mejoras nuevas.</small></p></div><button id="applyAppUpdate" type="button">ACTUALIZAR AHORA</button><button id="dismissAppUpdate" type="button" aria-label="Cerrar">×</button></aside>
   <div id="numberOneCelebration" class="number-one-celebration" hidden role="dialog" aria-modal="true" aria-labelledby="numberOneTitle">
     <div id="confettiLayer" class="confetti-layer" aria-hidden="true"></div>
     <div class="number-one-card">
@@ -221,7 +221,7 @@
       </section>
       <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
     </section>
-    <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨</footer>
+    <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨ · <span id="appVersionLabel">V5.31.2</span></footer>
   </main>
 
   <section id="screenMode" class="screen-mode" hidden aria-label="Modo pantalla">
@@ -261,5 +261,5 @@
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="config.js"></script><script src="app.js"></script>
+  <script src="config.js"></script><script src="app.js?v=5.31.2"></script>
 </body></html>
