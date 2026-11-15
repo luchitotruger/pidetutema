@@ -1138,3 +1138,50 @@ body.layout-desktop #guest{grid-template-columns:minmax(360px,.78fr) minmax(540p
 
 /* ===== V5.33.4 GESTION KARAOKE + LIMITE 10 ===== */
 .karaoke-usage{display:flex;justify-content:space-between;align-items:center;margin:11px 0 0;padding:9px 11px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted);font-size:.7rem}.karaoke-usage strong{color:#fde68a;font-size:.8rem}.karaoke-cleanup{margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}.karaoke-cleanup-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.karaoke-cleanup-kpis article{text-align:center;padding:10px 6px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035)}.karaoke-cleanup-kpis b,.karaoke-cleanup-kpis small{display:block}.karaoke-cleanup-kpis b{font-size:1.2rem}.karaoke-cleanup-kpis small{color:var(--muted);font-size:.61rem}.karaoke-cleanup-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.karaoke-cleanup-actions .tool-button{border-radius:12px}.karaoke-entry-actions [data-karaoke-delete]{border-color:rgba(251,113,133,.38);color:#fecdd3}@media(max-width:650px){.karaoke-cleanup-kpis{grid-template-columns:repeat(2,1fr)}.karaoke-cleanup-actions{grid-template-columns:1fr}}
+
+/* ===== V5.34 UX INVITADOS + FOTO BARRA MOVIL ===== */
+@media(max-width:900px){
+  body #guest{display:flex!important;flex-direction:column!important;gap:14px!important;max-width:680px;margin-inline:auto}
+  #guest>*{min-width:0}
+  #guest .guest-side,#guest .live-interaction-guest{display:contents!important}
+  /* 1 Avisos importantes */
+  #guest>:has(#partyPushCard),#guest #partyPushCard{order:10}
+  /* 2 Como quieres aparecer */
+  #guest>:has(#guestIdentity),#guest #guestIdentity{order:20}
+  /* 3 Que quieres bailar */
+  #guest>:has(#requestForm),#guest #requestForm{order:30}
+  /* 4 Competencia en vivo */
+  #guest>:has(#karaokeGuestCard),#guest #karaokeGuestCard{order:40}
+  #guest>:has(#battleGuestCard),#guest #battleGuestCard{order:41}
+  #guest>:has(#challengeGuestCard),#guest #challengeGuestCard{order:42}
+  /* 5 Mensajes de la fiesta */
+  #guest>:has(#partyGreetingGuest),#guest #partyGreetingGuest{order:50}
+  /* 6 Experiencias de la fiesta */
+  #guest>:has(#socialPartyGuest),#guest #socialPartyGuest{order:60}
+  #guest>:has(#djSurpriseGuestCard),#guest #djSurpriseGuestCard{order:61}
+  /* 7 Ranking en vivo */
+  #guest>:has(#ranking),#guest .ranking-card{order:70}
+  /* Restantes: informacion activa y luego perfil/historial */
+  #guest>:has(#nowPlaying),#guest #nowPlaying{order:80}
+  #guest>:has(#liveReactions),#guest #liveReactions{order:81}
+  #guest>:has(#nextUpCard),#guest #nextUpCard{order:82}
+  #guest>:has(#trendsCard),#guest #trendsCard{order:83}
+  #guest>:has(#myPartyHub),#guest #myPartyHub{order:90}
+  #guest>:has(#mySongsCard),#guest #mySongsCard{order:100}
+  #guest>:has(#recommendationsCard),#guest #recommendationsCard{order:110}
+  #guest>:has(#guestGame),#guest #guestGame{order:120}
+  #guest>:has(#achievementsCard),#guest #achievementsCard{order:121}
+  #guest>:has(#guestActivity),#guest #guestActivity{order:122}
+  #guest>:has(#djFeedbackCard),#guest #djFeedbackCard{order:130}
+  #guest>:has(#myNightCard),#guest #myNightCard{order:140}
+  #partyPushCard,#guestIdentity,#requestForm,#karaokeGuestCard,#partyGreetingGuest,#socialPartyGuest,.ranking-card{scroll-margin-top:12px}
+  /* 4 accesos: Pedir, Ranking, Foto, Mi Fiesta */
+  .mobile-bottom-nav{grid-template-columns:repeat(4,1fr)!important}
+  .mobile-bottom-nav .mobile-context-action{background:linear-gradient(135deg,color-mix(in srgb,var(--event-primary) 26%,transparent),color-mix(in srgb,var(--event-secondary) 18%,transparent))}
+  .mobile-photo-action{position:relative}
+  .mobile-photo-action.active-photo{background:rgba(250,204,21,.12)!important;color:#fde68a!important;animation:photoNavPulse 1.6s ease-in-out 3}
+  #mobilePhotoBadge{position:absolute;right:10px;top:7px;display:grid;place-items:center;width:11px;height:11px;border-radius:50%;background:#facc15;color:#facc15;box-shadow:0 0 11px #facc15;font-size:0}
+  #mobilePhotoBadge[hidden]{display:none}
+  .quick-photo-active,.quick-photo-inactive{text-align:center;padding:8px 4px 2px}.quick-photo-active>span,.quick-photo-inactive>span{display:block;font-size:3rem}.quick-photo-active strong,.quick-photo-inactive strong{display:block;margin:7px 0;font-size:1rem}.quick-photo-active p,.quick-photo-inactive p{margin:0;color:var(--muted);font-size:.75rem;line-height:1.4}.quick-photo-active .primary{min-height:50px}
+}
+@keyframes photoNavPulse{50%{transform:translateY(-2px);box-shadow:0 0 18px rgba(250,204,21,.15)}}
