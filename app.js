@@ -1,6 +1,6 @@
 // V5.33.3 UX Seleccion Musical
 'use strict';
-  const APP_VERSION="5.34";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
+  const APP_VERSION="5.34.1";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
   function projectionActive(){return Boolean((el.screenPartyPhoto&&!el.screenPartyPhoto.hidden)||(el.screenPartyGreeting&&!el.screenPartyGreeting.hidden)||(el.screenKaraoke&&!el.screenKaraoke.hidden)||(el.screenDedication&&!el.screenDedication.hidden))}
   function reloadForUpdate(){if(updateReloading)return;updateReloading=true;sessionStorage.setItem('ptt-update-reload',APP_VERSION);if(pendingSw)pendingSw.postMessage({type:'SKIP_WAITING'});else location.reload()}
   function showAppUpdate(worker=null){pendingSw=worker||pendingSw;if(el.appUpdateBanner)el.appUpdateBanner.hidden=false;if(screenModeActive){clearTimeout(screenUpdateTimer);const wait=()=>{if(!projectionActive())reloadForUpdate();else screenUpdateTimer=setTimeout(wait,1000)};screenUpdateTimer=setTimeout(wait,1000)}}
@@ -107,7 +107,7 @@ function formatPhotoBytes(n){const x=Number(n)||0;if(x<1024)return `${x} B`;if(x
 async function invokePhotoManager(action,photoId=null){const {data:sd,error:se}=await db.auth.getSession(),token=sd?.session?.access_token;if(se||!token)throw new Error('Sesion DJ no disponible');const {data,error}=await db.functions.invoke('manage-party-photos',{headers:{Authorization:`Bearer ${token}`},body:{action,event_id:eventId,photo_id:photoId}});if(error||!data?.ok)throw new Error(data?.error||error?.message||'Error gestionando fotografias');return data}
 async function loadPartyPhotoStats(){if(!session||!eventId||!el.partyPhotoCleanup)return;try{const d=await invokePhotoManager('stats'),s=d.stats||{};el.photoStorageTotal.textContent=Number(s.total)||0;el.photoStorageBytes.textContent=formatPhotoBytes(s.bytes);el.photoStorageRejected.textContent=Number(s.rejected)||0;el.deleteRejectedPhotos.disabled=!(Number(s.rejected)>0);el.deleteAllEventPhotos.disabled=!(Number(s.total)>0)}catch(e){el.partyPhotoCleanupNotice.textContent=e.message}}
 async function deletePartyPhotos(action,photoId=null){const label=action==='delete_one'?'esta foto':action==='delete_rejected'?'todas las fotos rechazadas':'TODAS las fotos del evento';if(!confirm(`¿Eliminar ${label}?\n\nEsta accion es permanente y no se puede deshacer.`))return;el.partyPhotoCleanupNotice.textContent='Eliminando de Storage y base de datos…';try{const d=await invokePhotoManager(action,photoId);el.partyPhotoCleanupNotice.textContent=`✅ ${d.deleted||0} foto(s) eliminada(s) · ${formatPhotoBytes(d.bytes)} liberados`;toast('🧹 Limpieza completada',`${d.deleted||0} foto(s) eliminada(s)`,'success');await loadPartyPhotos();await loadPartyPhotoStats()}catch(e){el.partyPhotoCleanupNotice.textContent=e.message;toast('No se pudo eliminar',e.message,'error')}}
-let karaokeState={nomination:'self',round:null,entries:[],ranking:[],active:null,timer:null,screenTimer:null,pollTimer:null,selectedMusic:null,manualSong:false,searchTimer:null,searchSeq:0,usage:{used:0,limit:10}};
+let karaokeState={nomination:'self',round:null,entries:[],ranking:[],active:null,timer:null,screenTimer:null,pollTimer:null,selectedMusic:null,manualSong:false,searchTimer:null,searchSeq:0,usage:{used:0,limit:10},projectionInFlight:false,lastProjectionCheck:0};
 function scheduleKaraokeMusicSearch(){clearTimeout(karaokeState.searchTimer);const q=el.karaokeMusicSearch.value.trim();el.clearKaraokeMusicSearch.hidden=!q;if(q.length<3){el.karaokeMusicResults.hidden=true;el.karaokeMusicSearchStatus.textContent=q?'Escribe al menos 3 caracteres.':'';return}el.karaokeMusicSearchStatus.textContent='Buscando canciones…';karaokeState.searchTimer=setTimeout(()=>searchKaraokeMusic(q),280)}
 function searchKaraokeMusic(query){const seq=++karaokeState.searchSeq,callback=`karaokeItunes_${Date.now()}_${seq}`,script=document.createElement('script'),timeout=setTimeout(()=>finish('La búsqueda tardó demasiado. Intenta nuevamente.'),8000);function cleanup(){clearTimeout(timeout);delete window[callback];script.remove()}function finish(error,data){if(seq!==karaokeState.searchSeq){cleanup();return}cleanup();if(error){el.karaokeMusicSearchStatus.textContent=error;el.karaokeMusicResults.hidden=true;return}renderKaraokeMusicResults(data.results||[])}window[callback]=data=>finish(null,data);script.onerror=()=>finish('No fue posible consultar el catálogo musical.');script.src=`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&country=CL&media=music&entity=song&limit=8&lang=en_us&callback=${encodeURIComponent(callback)}`;document.body.appendChild(script)}
 function renderKaraokeMusicResults(items){const unique=[],seen=new Set();for(const x of items){const key=`${x.trackName}|${x.artistName}`.toLowerCase();if(!seen.has(key)){seen.add(key);unique.push(x)}}el.karaokeMusicSearchStatus.textContent=unique.length?'Selecciona la canción correcta:':'No encontramos resultados. Puedes escribirla manualmente.';el.karaokeMusicResults.hidden=!unique.length;el.karaokeMusicResults.innerHTML=unique.slice(0,6).map((x,i)=>`<button type="button" class="karaoke-music-result" data-karaoke-music-result="${i}"><img src="${esc((x.artworkUrl100||'').replace('100x100','200x200'))}" alt=""><span><b>${esc(x.trackName)}</b><small>${esc(x.artistName)}${x.collectionName?' · '+esc(x.collectionName):''}</small></span><i>＋</i></button>`).join('');el.karaokeMusicResults.querySelectorAll('[data-karaoke-music-result]').forEach((b,i)=>b.onclick=()=>selectKaraokeMusic(unique[i]))}
@@ -132,28 +132,139 @@ async function startKaraokeRound(){const {error}=await db.rpc('start_karaoke_rou
 async function updateKaraokeEntry(id,status){const {error}=await db.rpc('update_karaoke_entry_v533',{p_entry_id:id,p_status:status});if(error){toast('No se pudo actualizar',error.message,'error');return}toast('🎤 Karaoke actualizado',karaokeStatusLabel(status),'success');await loadKaraokeState()}
 async function projectKaraoke(id,type='call'){const {error}=await db.rpc('project_karaoke_v533',{p_event_id:eventId,p_entry_id:id,p_type:type,p_seconds:60});if(error){toast('No se pudo proyectar',error.message,'error');return}if(type==='call')await updateKaraokeEntry(id,'called');toast('🎬 Karaoke enviado a Pantalla Fiesta',type==='winner'?'¡Tenemos ganador!':'Cantante llamado','success');await syncProjectedKaraoke()}
 function startKaraokeProjectionPolling(){
-  clearInterval(karaokeState.pollTimer);
-  karaokeState.pollTimer=null;
+  if(karaokeState.pollTimer) return;
+  if(!screenModeActive) return;
 
-  if(!screenModeActive)return;
-
-  syncProjectedKaraoke();
+  if(!document.hidden){
+    syncProjectedKaraoke();
+  }
 
   karaokeState.pollTimer=setInterval(()=>{
-    if(screenModeActive){
+    if(
+      screenModeActive &&
+      !document.hidden &&
+      !karaokeState.projectionInFlight
+    ){
       syncProjectedKaraoke();
     }
-  },2000);
+  },5000);
 }
 
 function stopKaraokeProjectionPolling(){
   clearInterval(karaokeState.pollTimer);
   karaokeState.pollTimer=null;
+  karaokeState.projectionInFlight=false;
 }
 
 async function clearProjectedKaraoke(){await db.rpc('clear_projected_karaoke_v533',{p_event_id:eventId});hideProjectedKaraoke()}
-function hideProjectedKaraoke(){if(el.screenKaraoke)el.screenKaraoke.hidden=true;clearTimeout(karaokeState.screenTimer);karaokeState.screenTimer=null;if(screenModeActive&&partyScreen.auto&&!partyScreen.timer)partyRestartTimer()}
-async function syncProjectedKaraoke(){if(!db||!eventId||!el.screenKaraoke)return;const {data,error}=await db.functions.invoke('get-projected-karaoke',{body:{event_id:eventId}});if(error||!data?.ok||!data?.karaoke){hideProjectedKaraoke();return}const k=data.karaoke,w=k.type==='winner';el.screenKaraokeIcon.textContent=w?'🏆':'🎤';el.screenKaraokeKicker.textContent=w?'GANADOR DEL KARAOKE':'PRÓXIMO CANTANTE';el.screenKaraokeSingerLabel.textContent=w?'GANADOR':'CANTA AHORA';el.screenKaraokeSinger.textContent=String(k.singer_name||'CANTANTE').trim().toUpperCase();el.screenKaraokeSong.textContent=`${k.song_title}${k.song_artist?' · '+k.song_artist:''}`;el.screenKaraokeMeta.textContent=k.proposer_name?`Propuesto por ${k.proposer_name}`:'Karaoke espontáneo';el.screenKaraokeScore.textContent=w?`⭐ ${Number(k.average).toFixed(2)} · ${k.votes} votos`:'';el.screenKaraoke.hidden=false;clearInterval(partyScreen.timer);partyScreen.timer=null;clearTimeout(karaokeState.screenTimer);karaokeState.screenTimer=setTimeout(()=>{hideProjectedKaraoke();if(screenModeActive&&partyScreen.auto){partyRestartTimer();partyAdvance(1)}},Math.max(1000,new Date(k.until)-Date.now()))}
+function hasPriorityProjection(){
+  return Boolean(
+    (el.screenPartyPhoto && !el.screenPartyPhoto.hidden) ||
+    (el.screenPartyGreeting && !el.screenPartyGreeting.hidden) ||
+    (el.screenKaraoke && !el.screenKaraoke.hidden) ||
+    (el.screenDedication && !el.screenDedication.hidden)
+  );
+}
+
+function hideProjectedKaraoke(){
+  if(el.screenKaraoke) el.screenKaraoke.hidden=true;
+
+  clearTimeout(karaokeState.screenTimer);
+  karaokeState.screenTimer=null;
+
+  if(
+    screenModeActive &&
+    partyScreen.auto &&
+    !partyScreen.timer &&
+    !hasPriorityProjection()
+  ){
+    partyRestartTimer();
+  }
+}
+async function syncProjectedKaraoke(){
+  if(
+    !db ||
+    !eventId ||
+    !el.screenKaraoke ||
+    karaokeState.projectionInFlight
+  ) return;
+
+  const now=Date.now();
+
+  if(now-karaokeState.lastProjectionCheck<1500) return;
+
+  karaokeState.projectionInFlight=true;
+  karaokeState.lastProjectionCheck=now;
+
+  try{
+    const {data,error}=await db.functions.invoke(
+      'get-projected-karaoke',
+      {
+        body:{event_id:eventId}
+      }
+    );
+
+    if(error || !data?.ok || !data?.karaoke){
+      hideProjectedKaraoke();
+      return;
+    }
+
+    const k=data.karaoke;
+    const winner=k.type==='winner';
+
+    el.screenKaraokeIcon.textContent=winner?'🏆':'🎤';
+    el.screenKaraokeKicker.textContent=
+      winner?'GANADOR DEL KARAOKE':'PRÓXIMO CANTANTE';
+
+    el.screenKaraokeSingerLabel.textContent=
+      winner?'GANADOR':'CANTA AHORA';
+
+    el.screenKaraokeSinger.textContent=
+      String(k.singer_name||'CANTANTE').trim().toUpperCase();
+
+    el.screenKaraokeSong.textContent=
+      `${k.song_title}${k.song_artist?' · '+k.song_artist:''}`;
+
+    el.screenKaraokeMeta.textContent=
+      k.proposer_name
+        ? `Propuesto por ${k.proposer_name}`
+        : 'Karaoke espontáneo';
+
+    el.screenKaraokeScore.textContent=
+      winner
+        ? `⭐ ${Number(k.average).toFixed(2)} · ${k.votes} votos`
+        : '';
+
+    el.screenKaraoke.hidden=false;
+
+    clearInterval(partyScreen.timer);
+    partyScreen.timer=null;
+
+    clearTimeout(karaokeState.screenTimer);
+
+    const remaining=Math.max(
+      1000,
+      new Date(k.until).getTime()-Date.now()
+    );
+
+    karaokeState.screenTimer=setTimeout(()=>{
+      hideProjectedKaraoke();
+
+      if(
+        screenModeActive &&
+        partyScreen.auto &&
+        !hasPriorityProjection()
+      ){
+        partyRestartTimer();
+        partyAdvance(1);
+      }
+    },remaining);
+
+  } finally {
+    karaokeState.projectionInFlight=false;
+  }
+}
+
 let greetingState={type:'greeting',pending:[],approved:[],timer:null};
 async function invokeGreetingManager(action,greetingId=null){const {data:sd,error:se}=await db.auth.getSession(),token=sd?.session?.access_token;if(se||!token)throw new Error('Sesion DJ no disponible');const {data,error}=await db.functions.invoke('manage-party-greetings',{headers:{Authorization:`Bearer ${token}`},body:{action,event_id:eventId,greeting_id:greetingId}});if(error||!data?.ok)throw new Error(data?.error||error?.message||'Error gestionando saludos');return data}
 async function loadGreetingStats(){if(!session||!eventId||!el.partyGreetingCleanup)return;try{const d=await invokeGreetingManager('stats'),s=d.stats||{};el.greetingTotal.textContent=Number(s.total)||0;el.greetingPending.textContent=Number(s.pending)||0;el.greetingApprovedCount.textContent=Number(s.approved)||0;el.greetingRejected.textContent=Number(s.rejected)||0;el.deleteRejectedGreetings.disabled=!(Number(s.rejected)>0);el.deleteAllGreetings.disabled=!(Number(s.total)>0)}catch(e){el.greetingCleanupNotice.textContent=e.message}}
@@ -171,7 +282,7 @@ async function uploadPartyPhoto(roundId,file){const status=el.socialPartyGuestLi
 async function signedPartyPhoto(path){const {data,error}=await db.storage.from('party-photos').createSignedUrl(path,300);return error?null:data.signedUrl}
 async function loadPartyPhotos(){if(!db||!eventId)return;if(!session){return}const {data,error}=await db.rpc('get_party_photos_v5301',{p_event_id:eventId,p_moderation:true});if(error){console.warn('Fotos V5.30.1:',error.message);return}const all=data||[];partyPhotoState.pending=all.filter(x=>x.status==='pending');partyPhotoState.approved=all.filter(x=>x.status==='approved');el.partyPhotoModeration.hidden=!(socialState.rounds.some(x=>x.kind==='photo')||all.length);el.partyPhotoPendingCount.textContent=partyPhotoState.pending.length;const render=async(list,approved)=>{const rows=[];for(const x of list){const url=await signedPartyPhoto(x.storage_path);if(url)rows.push(`<article class="party-photo-item" data-photo-id="${x.id}"><img src="${url}" alt="Foto de invitado">${approved?'':`<div class="party-photo-actions"><button data-photo-moderate="approved" data-photo-id="${x.id}">✅</button><button data-photo-moderate="rejected" data-photo-id="${x.id}">❌</button></div>`}${approved?`<div class="party-photo-actions"><button data-project-photo="${x.id}">🎬 Proyectar</button><button data-clear-photo="1">⏹ Quitar</button><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`:`<div class="party-photo-delete-row"><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`}</article>`)}return rows.join('')};el.partyPhotoQueue.innerHTML=await render(partyPhotoState.pending,false)||'<div class="summary-empty">Sin fotos pendientes.</div>';el.partyPhotoApproved.innerHTML=await render(partyPhotoState.approved,true)||'<div class="summary-empty">Sin fotos aprobadas.</div>';await loadPartyPhotoStats()}
 async function moderatePartyPhoto(id,status){const {error}=await db.rpc('moderate_party_photo_v5301',{p_photo_id:id,p_status:status});if(error){toast('No se pudo moderar',error.message,'error');return}toast(status==='approved'?'✅ Foto aprobada':'❌ Foto rechazada','',status==='approved'?'success':'info');await loadPartyPhotos()}
-async function projectPartyPhoto(id){const x=partyPhotoState.approved.find(p=>p.id===id);if(!x){toast('Foto no disponible','','error');return}const {error}=await db.rpc('project_party_photo_v5302',{p_event_id:eventId,p_photo_id:id,p_seconds:15});if(error){toast('No se pudo proyectar',error.message,'error');return}toast('🎬 Foto enviada a Pantalla Fiesta','Se mostrará durante 15 segundos','success');await syncProjectedPhoto()}
+async function projectPartyPhoto(id){const x=partyPhotoState.approved.find(p=>p.id===id);if(!x){toast('Foto no disponible','','error');return}const {error}=await db.rpc('project_party_photo_v5302',{p_event_id:eventId,p_photo_id:id,p_seconds:30});if(error){toast('No se pudo proyectar',error.message,'error');return}toast('🎬 Foto enviada a Pantalla Fiesta','Se mostrará durante 15 segundos','success');await syncProjectedPhoto()}
 async function clearProjectedPartyPhoto(){const {error}=await db.rpc('clear_projected_photo_v5302',{p_event_id:eventId});if(error){toast('No se pudo quitar',error.message,'error');return}toast('⏹ Foto retirada de Pantalla Fiesta','','success');hideProjectedPartyPhoto()}
 function hideProjectedPartyPhoto(){
   if(el.screenPartyPhoto)el.screenPartyPhoto.hidden=true;
@@ -180,7 +291,12 @@ function hideProjectedPartyPhoto(){
   clearTimeout(partyPhotoState.projectTimer);
   partyPhotoState.projectTimer=null;
 
-  if(screenModeActive&&partyScreen.auto&&!partyScreen.timer){
+  if(
+    screenModeActive &&
+    partyScreen.auto &&
+    !partyScreen.timer &&
+    !hasPriorityProjection()
+  ){
     partyRestartTimer();
   }
 }
@@ -357,6 +473,19 @@ function screenVisibleRows(){return rows.filter(x=>x.status!=='played'&&x.status
 function renderScreenMode(){if(!el.screenMode)return;renderScreenQr();renderPartyScene();const playing=currentPlayingSong(),visible=screenVisibleRows(),featured=projectorState.featured_request_id?rows.find(x=>x.id===projectorState.featured_request_id):null;if(playing){const artwork=playing.artwork_url?`<img src="${esc(playing.artwork_url)}" alt="">`:'<div class="screen-artwork-fallback">🎵</div>';el.screenNow.innerHTML=`<div class="screen-artwork">${artwork}</div><div class="screen-now-copy"><span class="screen-now-label">🔊 SONANDO AHORA</span><h2>${esc(playing.title)}</h2><div class="screen-now-artist">${esc(playing.artist||'Artista por confirmar')}</div>${playing.requester_name?`<div class="screen-now-meta">🎉 Pedida por ${esc(playing.requester_name)}</div>`:''}${playing.message?`<div class="screen-now-message">💬 “${esc(playing.message)}”</div>`:''}</div>`}else{el.screenNow.innerHTML='<div class="screen-idle"><div class="screen-idle-icon">🎧</div><h2>La fiesta sigue</h2><p>Pide tu canción y vota por tus favoritas</p></div>'}el.screenTop3.innerHTML=visible.length?visible.slice(0,3).map((x,i)=>`<div class="screen-rank-row"><span class="screen-medal">${['🥇','🥈','🥉'][i]}</span><span><b>${esc(x.title)}</b><small>${esc(x.artist||'Artista por confirmar')}</small></span><span class="screen-rank-votes">♥ ${x.votes}</span></div>`).join(''):'<div class="summary-empty">Esperando las primeras canciones…</div>';const showFeatured=Boolean(featured&&featured.message&&featured.message.trim());el.screenDedication.hidden=!showFeatured;if(showFeatured){el.screenDedicationArtwork.innerHTML=featured.artwork_url?`<img src="${esc(featured.artwork_url)}" alt="">`:'<div class="screen-artwork-fallback">🎵</div>';el.screenDedicationSong.textContent=`${featured.title} · ${featured.artist||'Artista por confirmar'}`;el.screenDedicationMessage.textContent=`“${featured.message.trim()}”`;el.screenDedicationRequester.textContent=featured.requester_name?`🎉 De ${featured.requester_name}`:'🎉 De un invitado'}}
 function startScreenClock(){clearInterval(screenClockTimer);const tick=()=>{el.screenClock.textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})};tick();screenClockTimer=setInterval(tick,30000)}
 function openScreenMode(){screenModeActive=true;el.screenMode.hidden=false;partyRestartTimer();startKaraokeProjectionPolling();document.body.classList.add('screen-active');const u=new URL(location.href);u.searchParams.set('modo','pantalla');history.replaceState({},'',u);startScreenClock();renderScreenMode()}
+document.addEventListener('visibilitychange',()=>{
+  if(!screenModeActive) return;
+
+  if(document.hidden){
+    stopKaraokeProjectionPolling();
+  }else{
+    syncProjectedPhoto();
+    syncProjectedGreeting();
+    syncProjectedKaraoke();
+    startKaraokeProjectionPolling();
+  }
+});
+
 function closeScreenMode(){screenModeActive=false;stopKaraokeProjectionPolling();el.screenMode.hidden=true;document.body.classList.remove('screen-active');clearInterval(screenClockTimer);const u=new URL(location.href);u.searchParams.delete('modo');history.replaceState({},'',u)}
 function currentPlayingSong(){return rows.find(x=>x.status==='playing')||null}
 function syncDedicationControl(){if(!el.highlightDedication)return;const song=currentPlayingSong(),available=Boolean(session&&song&&song.message&&song.message.trim());el.highlightDedication.disabled=!available;el.highlightDedication.textContent=available?'💬 Destacar dedicatoria':song?'💬 Sin dedicatoria':'💬 Destacar dedicatoria';el.clearProjectedDedication.disabled=!Boolean(session&&projectorState.featured_request_id)}
