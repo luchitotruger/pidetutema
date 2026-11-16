@@ -1,10 +1,40 @@
 // V5.33.3 UX Seleccion Musical
 'use strict';
-  const APP_VERSION="5.34.1";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
+  const APP_VERSION="5.34.2";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
   function projectionActive(){return Boolean((el.screenPartyPhoto&&!el.screenPartyPhoto.hidden)||(el.screenPartyGreeting&&!el.screenPartyGreeting.hidden)||(el.screenKaraoke&&!el.screenKaraoke.hidden)||(el.screenDedication&&!el.screenDedication.hidden))}
-  function reloadForUpdate(){if(updateReloading)return;updateReloading=true;sessionStorage.setItem('ptt-update-reload',APP_VERSION);if(pendingSw)pendingSw.postMessage({type:'SKIP_WAITING'});else location.reload()}
+  function reloadForUpdate(){
+  if(updateReloading)return;
+
+  updateReloading=true;
+
+  if(el.applyAppUpdate){
+    el.applyAppUpdate.disabled=true;
+    el.applyAppUpdate.textContent='🔄 ACTUALIZANDO...';
+  }
+
+  sessionStorage.setItem('ptt-update-reload',APP_VERSION);
+
+  if(pendingSw){
+    pendingSw.postMessage({type:'SKIP_WAITING'});
+
+    setTimeout(()=>{
+      if(updateReloading){
+        location.reload();
+      }
+    },2500);
+
+    return;
+  }
+
+  location.reload();
+}
   function showAppUpdate(worker=null){pendingSw=worker||pendingSw;if(el.appUpdateBanner)el.appUpdateBanner.hidden=false;if(screenModeActive){clearTimeout(screenUpdateTimer);const wait=()=>{if(!projectionActive())reloadForUpdate();else screenUpdateTimer=setTimeout(wait,1000)};screenUpdateTimer=setTimeout(wait,1000)}}
-  function bindAutoUpdate(){if(el.appVersionLabel)el.appVersionLabel.textContent=`V${APP_VERSION}`;if(!('serviceWorker'in navigator))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(sessionStorage.getItem('ptt-update-reload')!==APP_VERSION)location.reload();else sessionStorage.removeItem('ptt-update-reload')});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('/service-worker.js?v='+APP_VERSION,{updateViaCache:'none'});if(reg.waiting)showAppUpdate(reg.waiting);reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(!nw)return;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller)showAppUpdate(nw)})});setInterval(()=>reg.update().catch(()=>{}),60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});window.addEventListener('online',()=>reg.update().catch(()=>{}))}catch(e){console.warn('PWA update:',e.message)}})}
+  function bindAutoUpdate(){if(el.appVersionLabel)el.appVersionLabel.textContent=`V${APP_VERSION}`;if(!('serviceWorker'in navigator))return;navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(!updateReloading)return;
+
+  sessionStorage.removeItem('ptt-update-reload');
+  location.reload();
+});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('/service-worker.js?v='+APP_VERSION,{updateViaCache:'none'});if(reg.waiting)showAppUpdate(reg.waiting);reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(!nw)return;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller)showAppUpdate(nw)})});setInterval(()=>reg.update().catch(()=>{}),60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update().catch(()=>{})});window.addEventListener('online',()=>reg.update().catch(()=>{}))}catch(e){console.warn('PWA update:',e.message)}})}
 
 const cfg=window.APP_CONFIG||{};
 const configured=/^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(cfg.SUPABASE_URL||'')&&!String(cfg.SUPABASE_PUBLISHABLE_KEY||'').startsWith('TU_');
