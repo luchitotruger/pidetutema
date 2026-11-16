@@ -5,51 +5,42 @@ Deno.serve(async(req)=>{
  if(req.method==='OPTIONS')return new Response('ok',{headers:cors})
  try{
   const auth=req.headers.get('Authorization')||''
-  const token=auth.replace(/^Bearer\\s+/i,'').trim()
+  const token=auth.replace(/^Bearer\s+/i,'').trim()
   if(!token)throw new Error('Falta token de autenticación del DJ')
-
-  const supabaseUrl=Deno.env.get('SUPABASE_URL')!
-  const service=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  const admin=createClient(supabaseUrl,service)
-
-  const parts=token.split('.')
-  if(parts.length!==3)throw new Error('Token DJ inválido')
-
-  const jwtPayload=JSON.parse(
-    atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))
-  )
-
-  if(!jwtPayload.sub)throw new Error('JWT DJ sin usuario')
-  if(jwtPayload.role!=='authenticated')throw new Error('Usuario DJ no autenticado')
-
+  const admin=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+  const parts=token.split('.');if(parts.length!==3)throw new Error('Token DJ inválido')
+  const jwtPayload=JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')))
+  if(!jwtPayload.sub||jwtPayload.role!=='authenticated')throw new Error('Usuario DJ no autenticado')
   const userId=jwtPayload.sub
-
-  console.log('SEND_EVENT_PUSH_AUTH_OK:',userId)
-
   const body=await req.json()
-  const {
-    event_id,
-    message,
-    priority='important',
-    duration_seconds=15,
-    sound_enabled=true
-  }=body
+  const {event_id,message,priority='important',duration_seconds=15,sound_enabled=true,target_visitor_id=null,karaoke_entry_id=null,notification_type='announcement',title=null}=body
   if(!event_id||!String(message||'').trim())throw new Error('Faltan evento o mensaje')
-  const {data:event,error:ee}=await admin.from('events').select('id,slug,owner_id').eq('id',event_id).single();if(ee||!event)throw new Error('Evento no encontrado');if(event.owner_id!==userId)throw new Error('No eres propietario del evento')
-  const {data:announcement,error:ae}=await admin.from('event_announcements').insert({event_id,message:String(message).trim().slice(0,240),priority,duration_seconds,sound_enabled,is_active:true,expires_at:Number(duration_seconds)>0?new Date(Date.now()+Number(duration_seconds)*1000).toISOString():null}).select('id').single();if(ae)throw ae
-  const {data:subs,error:se}=await admin.from('event_push_subscriptions').select('id,endpoint,p256dh,auth').eq('event_id',event_id).eq('is_active',true);if(se)throw se
+  const {data:event,error:ee}=await admin.from('events').select('id,slug,owner_id').eq('id',event_id).single()
+  if(ee||!event)throw new Error('Evento no encontrado');if(event.owner_id!==userId)throw new Error('No eres propietario del evento')
+  let targetVisitor=target_visitor_id?String(target_visitor_id):null
+  let singerName='',songTitle='',songArtist='',nominationType='self'
+  if(notification_type==='karaoke_call'){
+    if(!karaoke_entry_id)throw new Error('Falta karaoke_entry_id')
+    const {data:entry,error:ke}=await admin.from('karaoke_entries').select('id,event_id,visitor_id,singer_name,song_title,song_artist,nomination_type').eq('id',karaoke_entry_id).eq('event_id',event_id).single()
+    if(ke||!entry)throw new Error('Participación Karaoke no encontrada')
+    targetVisitor=entry.visitor_id;singerName=entry.singer_name;songTitle=entry.song_title;songArtist=entry.song_artist||'';nominationType=entry.nomination_type||'self'
+    const {data:last}=await admin.from('karaoke_call_alerts').select('last_sent_at,send_count').eq('entry_id',entry.id).maybeSingle()
+    if(last&&Date.now()-new Date(last.last_sent_at).getTime()<15000)throw new Error('Espera 15 segundos antes de volver a llamar')
+    await admin.from('karaoke_call_alerts').upsert({entry_id:entry.id,event_id,last_sent_at:new Date().toISOString(),send_count:Number(last?.send_count||0)+1})
+  }
+  let announcementId:string|null=null
+  if(notification_type==='announcement'){
+    const {data:a,error:ae}=await admin.from('event_announcements').insert({event_id,message:String(message).trim().slice(0,240),priority,duration_seconds,sound_enabled,is_active:true,expires_at:Number(duration_seconds)>0?new Date(Date.now()+Number(duration_seconds)*1000).toISOString():null}).select('id').single();if(ae)throw ae;announcementId=a.id
+  }
+  let q=admin.from('event_push_subscriptions').select('id,endpoint,p256dh,auth,visitor_id').eq('event_id',event_id).eq('is_active',true)
+  if(targetVisitor)q=q.eq('visitor_id',targetVisitor)
+  const {data:subs,error:se}=await q;if(se)throw se
   webpush.setVapidDetails(Deno.env.get('VAPID_SUBJECT')!,Deno.env.get('VAPID_PUBLIC_KEY')!,Deno.env.get('VAPID_PRIVATE_KEY')!)
-  const payload=JSON.stringify({title:'Pide Tu Tema · Luis DJ',body:String(message).trim(),priority,announcement_id:announcement.id,event_id,url:`/?evento=${encodeURIComponent(event.slug)}`})
+  const pushTitle=title||'Pide Tu Tema · Luis DJ'
+  const payload=JSON.stringify({title:pushTitle,body:String(message).trim(),priority,announcement_id:announcementId,event_id,url:`/?evento=${encodeURIComponent(event.slug)}&karaoke=call`,notification_type,karaoke_entry_id,singer_name:singerName,song_title:songTitle,song_artist:songArtist,nomination_type:nominationType,require_interaction:notification_type==='karaoke_call'})
   let sent=0,failed=0;const dead:string[]=[]
-  await Promise.all((subs||[]).map(async s=>{try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},payload,{TTL:3600,urgency:priority==='urgent'?'high':'normal'});sent++}catch(e){failed++;const code=(e as any)?.statusCode;if(code===404||code===410)dead.push(s.id)}}))
+  await Promise.all((subs||[]).map(async s=>{try{await webpush.sendNotification({endpoint:s.endpoint,keys:{p256dh:s.p256dh,auth:s.auth}},payload,{TTL:notification_type==='karaoke_call'?300:3600,urgency:priority==='urgent'?'high':'normal'});sent++}catch(e){failed++;const code=(e as any)?.statusCode;if(code===404||code===410)dead.push(s.id)}}))
   if(dead.length)await admin.from('event_push_subscriptions').update({is_active:false,updated_at:new Date().toISOString()}).in('id',dead)
-  return Response.json({ok:true,announcement_id:announcement.id,subscribed:(subs||[]).length,sent,failed},{headers:{...cors,'Content-Type':'application/json'}})
- }catch(e){
-  const message=e instanceof Error?e.message:String(e)
-  console.error('SEND_EVENT_PUSH_ERROR:',message)
-  return Response.json(
-    {ok:false,error:message},
-    {status:400,headers:{...cors,'Content-Type':'application/json'}}
-  )
- }
+  return Response.json({ok:true,announcement_id:announcementId,targeted:!!targetVisitor,subscribed:(subs||[]).length,sent,failed},{headers:{...cors,'Content-Type':'application/json'}})
+ }catch(e){const message=e instanceof Error?e.message:String(e);console.error('SEND_EVENT_PUSH_ERROR:',message);return Response.json({ok:false,error:message},{status:400,headers:{...cors,'Content-Type':'application/json'}})}
 })
