@@ -77,7 +77,105 @@ document.addEventListener('visibilitychange',()=>{
     refresh(true);
   }
 });
-function renderGuest(){const root=$('socialLiveGuest');if(!root)return;const s=state.star,t=state.thermometer;root.hidden=!((s&&s.phase!=='closed')||(t&&t.status==='active'));$('starGuest').hidden=!(s&&s.phase!=='closed');$('thermometerGuest').hidden=!(t&&t.status==='active');if(s){$('starGuestTitle').textContent=s.title||'Momento Estrella';if(s.phase==='nominations')$('starGuestBody').innerHTML=`<p>¿Quién está prendiendo la pista?</p><input id="starNominee" maxlength="50" placeholder="Nombre o apodo" value="${esc(s.my_nomination||'')}"><button class="primary" data-star-nominate="${s.id}">👑 NOMINAR</button>`;else $('starGuestBody').innerHTML=`<p>Vota por tu Momento Estrella.</p><div class="social-options">${(s.finalist_names||[]).map(x=>`<button data-star-vote="${s.id}" data-name="${esc(x)}" class="${s.my_vote===x?'selected':''}">👑 ${esc(x)}</button>`).join('')}</div>`}if(t){$('thermometerGuestTitle').textContent=t.title;$('thermometerGuestBody').innerHTML=`<div class="social-options thermometer-options">${(t.options||[]).map(x=>`<button data-thermo-vote="${t.id}" data-option="${esc(x)}" class="${t.my_vote===x?'selected':''}">${esc(x)}</button>`).join('')}</div><small>Puedes cambiar tu respuesta hasta el cierre.</small>`}}
+function renderGuest(){
+  const root=$('socialLiveGuest');
+  if(!root)return;
+
+  const s=state.star,t=state.thermometer;
+
+  root.hidden=!((s&&s.phase!=='closed')||(t&&t.status==='active'));
+
+  $('starGuest').hidden=!(s&&s.phase!=='closed');
+  $('thermometerGuest').hidden=!(t&&t.status==='active');
+
+  if(s){
+    $('starGuestTitle').textContent=s.title||'Momento Estrella';
+
+    if(s.phase==='nominations'){
+      const body=$('starGuestBody');
+      const current=$('starNominee');
+
+      /*
+       * V5.44.4
+       * No reconstruimos el formulario mientras el invitado
+       * está escribiendo. Así Realtime/polling puede actualizar
+       * el estado sin cerrar el teclado ni borrar el texto.
+       */
+      if(!current){
+        body.innerHTML=`
+          <p>¿Quién está prendiendo la pista?</p>
+          <input
+            id="starNominee"
+            maxlength="50"
+            placeholder="Nombre o apodo"
+            autocomplete="off"
+            value="${esc(s.my_nomination||'')}"
+          >
+          <button
+            class="primary"
+            data-star-nominate="${s.id}"
+          >
+            👑 NOMINAR
+          </button>
+        `;
+      }else{
+        const button=body.querySelector('[data-star-nominate]');
+
+        if(button){
+          button.dataset.starNominate=s.id;
+        }
+
+        /*
+         * Solo sincronizamos el valor guardado cuando
+         * el usuario NO está escribiendo.
+         */
+        if(
+          document.activeElement!==current &&
+          !current.value.trim()
+        ){
+          current.value=s.my_nomination||'';
+        }
+      }
+    }else{
+      $('starGuestBody').innerHTML=`
+        <p>Vota por tu Momento Estrella.</p>
+        <div class="social-options">
+          ${(s.finalist_names||[]).map(x=>`
+            <button
+              data-star-vote="${s.id}"
+              data-name="${esc(x)}"
+              class="${s.my_vote===x?'selected':''}"
+            >
+              👑 ${esc(x)}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+  }
+
+  if(t){
+    $('thermometerGuestTitle').textContent=t.title;
+
+    $('thermometerGuestBody').innerHTML=`
+      <div class="social-options thermometer-options">
+        ${(t.options||[]).map(x=>`
+          <button
+            data-thermo-vote="${t.id}"
+            data-option="${esc(x)}"
+            class="${t.my_vote===x?'selected':''}"
+          >
+            ${esc(x)}
+          </button>
+        `).join('')}
+      </div>
+
+      <small>
+        Puedes cambiar tu respuesta hasta el cierre.
+      </small>
+    `;
+  }
+}
 function resultBars(items,key){const total=(items||[]).reduce((a,x)=>a+Number(x.count||0),0)||1;return (items||[]).map((x,i)=>{const label=x[key],pct=Math.round(Number(x.count||0)*100/total);return `<div class="social-result"><span>${i<3?['🥇','🥈','🥉'][i]:''} ${esc(label)}</span><i><b style="width:${pct}%"></b></i><strong>${x.count} · ${pct}%</strong></div>`}).join('')||'<div class="summary-empty">Sin respuestas todavía.</div>'}
 function renderDj(){const root=$('socialLiveDj');if(!root)return;const s=state.star,t=state.thermometer;let star='';if(s){star=`<section class="social-dj-block"><h3>👑 ${esc(s.title)}</h3><small>Fase: ${esc(s.phase)}</small>${s.phase==='nominations'?`<div class="social-nominations">${(s.nominations||[]).map(x=>`<label><input type="checkbox" data-finalist="${esc(x.name)}"> ${esc(x.name)} <b>${x.count}</b></label>`).join('')}</div><button data-star-finalists="${s.id}">ABRIR VOTACIÓN CON SELECCIONADOS</button>`:s.phase==='voting'?`${resultBars(s.results,'name')}<button data-star-close="${s.id}">🏁 CERRAR Y ELEGIR GANADOR</button>`:`${resultBars(s.results,'name')}<button data-star-project-winner="${s.winner_name||''}">🎬 PROYECTAR ${esc(s.winner_name||'GANADOR')}</button>`}</section>`}const thermo=t?`<section class="social-dj-block"><h3>🔥 ${esc(t.title)}</h3><small>${t.participants||0} participantes · ${esc(t.status)}</small>${resultBars(t.results,'option')}<div class="social-dj-actions">${t.status==='active'?`<button data-thermo-close="${t.id}">🏁 CERRAR</button>`:''}<button data-thermo-project="${t.id}">🎬 PROYECTAR RESULTADO</button></div></section>`:'';$('socialLiveDjState').innerHTML=star+thermo}
 async function call(fn,args){const {data,error}=await db.rpc(fn,args);if(error){alert(error.message);return null}await refresh();return data}
