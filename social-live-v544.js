@@ -1,5 +1,36 @@
+(()=>{
+  const style=document.createElement('style');
+
+  style.textContent=`
+    .thermo-ended{
+      display:grid;
+      gap:7px;
+      text-align:center;
+      padding:18px;
+      border:1px solid rgba(250,204,21,.30);
+      border-radius:15px;
+      background:rgba(250,204,21,.06);
+      color:#fde68a;
+    }
+
+    .thermo-ended span{
+      font-size:2rem;
+    }
+
+    .thermo-ended small{
+      color:#c4b5fd;
+    }
+
+    .thermometer-options button:disabled{
+      opacity:.48;
+      pointer-events:none;
+    }
+  `;
+
+  document.head.appendChild(style);
+})();
 'use strict';
-(()=>{const cfg=window.APP_CONFIG||{},db=window.supabase?.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true}}),$=id=>document.getElementById(id),esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));if(!db)return;let eventId=null,session=null,state={},tick=null,socialPoll=null,refreshInFlight=false,lastRefreshAt=0;const visitor=localStorage.getItem('pide_tu_tema_visitor')||crypto.randomUUID();localStorage.setItem('pide_tu_tema_visitor',visitor);const nick=()=>localStorage.getItem(`pide_tu_tema_nickname:${new URLSearchParams(location.search).get('evento')}`)||'';
+(()=>{const cfg=window.APP_CONFIG||{},db=window.supabase?.createClient(cfg.SUPABASE_URL,cfg.SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true}}),$=id=>document.getElementById(id),esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));if(!db)return;let eventId=null,session=null,state={},tick=null,socialPoll=null,refreshInFlight=false,lastRefreshAt=0,thermoVoteInFlight=false; // THERMOMETER_ROBUST_V5447const visitor=localStorage.getItem('pide_tu_tema_visitor')||crypto.randomUUID();localStorage.setItem('pide_tu_tema_visitor',visitor);const nick=()=>localStorage.getItem(`pide_tu_tema_nickname:${new URLSearchParams(location.search).get('evento')}`)||'';
 async function boot(){const slug=new URLSearchParams(location.search).get('evento');if(!slug)return;const {data:e}=await db.from('events').select('id').eq('slug',slug).maybeSingle();if(!e)return;eventId=e.id;session=(await db.auth.getSession()).data.session;bind();await refresh();const ch=db.channel(`social-live:${eventId}`).on('postgres_changes',{event:'*',schema:'public',table:'star_moment_rounds',filter:`event_id=eq.${eventId}`},refresh).on('postgres_changes',{event:'*',schema:'public',table:'star_moment_nominations'},refresh).on('postgres_changes',{event:'*',schema:'public',table:'star_moment_votes'},refresh).on('postgres_changes',{event:'*',schema:'public',table:'party_thermometer_rounds',filter:`event_id=eq.${eventId}`},refresh).on('postgres_changes',{event:'*',schema:'public',table:'party_thermometer_votes'},refresh).subscribe();if(new URLSearchParams(location.search).get('modo')==='pantalla')tick=setInterval(syncProjection,3000)}
 async function refresh(force=false){
   if(!eventId || refreshInFlight)return;
@@ -12,6 +43,13 @@ async function refresh(force=false){
   lastRefreshAt=now;
 
   try{
+    await db.rpc(
+      'expire_thermometer_v5447',
+      {
+        p_event_id:eventId
+      }
+    );
+
     const {data,error}=await db.rpc(
       'get_social_live_v544',
       {
@@ -83,10 +121,25 @@ function renderGuest(){
 
   const s=state.star,t=state.thermometer;
 
-  root.hidden=!((s&&s.phase!=='closed')||(t&&t.status==='active'));
+  const showClosedThermometer=Boolean(
+    t &&
+    t.status==='closed' &&
+    t.closes_at &&
+    Date.now()-new Date(t.closes_at).getTime() < 300000
+  );
+
+  const showThermometer=Boolean(
+    t &&
+    (
+      t.status==='active' ||
+      showClosedThermometer
+    )
+  );
+
+  root.hidden=!((s&&s.phase!=='closed')||showThermometer);
 
   $('starGuest').hidden=!(s&&s.phase!=='closed');
-  $('thermometerGuest').hidden=!(t&&t.status==='active');
+  $('thermometerGuest').hidden=!showThermometer;
 
   if(s){
     $('starGuestTitle').textContent=s.title||'Momento Estrella';
@@ -157,29 +210,124 @@ function renderGuest(){
   if(t){
     $('thermometerGuestTitle').textContent=t.title;
 
-    $('thermometerGuestBody').innerHTML=`
-      <div class="social-options thermometer-options">
-        ${(t.options||[]).map(x=>`
-          <button
-            data-thermo-vote="${t.id}"
-            data-option="${esc(x)}"
-            class="${t.my_vote===x?'selected':''}"
-          >
-            ${esc(x)}
-          </button>
-        `).join('')}
-      </div>
+    const expired=
+      t.status!=='active' ||
+      !t.closes_at ||
+      new Date(t.closes_at).getTime()<=Date.now();
 
-      <small>
-        Puedes cambiar tu respuesta hasta el cierre.
-      </small>
-    `;
+    if(expired){
+      $('thermometerGuestBody').innerHTML=`
+        <div class="thermo-ended">
+          <span>⏱️</span>
+
+          <b>
+            Esta votación ya terminó.
+          </b>
+
+          <small>
+            Esperando la próxima pregunta de Luis DJ.
+          </small>
+        </div>
+      `;
+    }else{
+      $('thermometerGuestBody').innerHTML=`
+        <div class="social-options thermometer-options">
+          ${(t.options||[]).map(x=>`
+            <button
+              data-thermo-vote="${t.id}"
+              data-option="${esc(x)}"
+              class="${t.my_vote===x?'selected':''}"
+            >
+              ${esc(x)}
+            </button>
+          `).join('')}
+        </div>
+
+        <small>
+          ⏱️ Puedes cambiar tu respuesta hasta el cierre.
+        </small>
+      `;
+    }
   }
 }
 function resultBars(items,key){const total=(items||[]).reduce((a,x)=>a+Number(x.count||0),0)||1;return (items||[]).map((x,i)=>{const label=x[key],pct=Math.round(Number(x.count||0)*100/total);return `<div class="social-result"><span>${i<3?['🥇','🥈','🥉'][i]:''} ${esc(label)}</span><i><b style="width:${pct}%"></b></i><strong>${x.count} · ${pct}%</strong></div>`}).join('')||'<div class="summary-empty">Sin respuestas todavía.</div>'}
 function renderDj(){const root=$('socialLiveDj');if(!root)return;const s=state.star,t=state.thermometer;let star='';if(s){star=`<section class="social-dj-block"><h3>👑 ${esc(s.title)}</h3><small>Fase: ${esc(s.phase)}</small>${s.phase==='nominations'?`<div class="social-nominations">${(s.nominations||[]).map(x=>`<label><input type="checkbox" data-finalist="${esc(x.name)}"> ${esc(x.name)} <b>${x.count}</b></label>`).join('')}</div><button data-star-finalists="${s.id}">ABRIR VOTACIÓN CON SELECCIONADOS</button>`:s.phase==='voting'?`${resultBars(s.results,'name')}<button data-star-close="${s.id}">🏁 CERRAR Y ELEGIR GANADOR</button>`:`${resultBars(s.results,'name')}<button data-star-project-winner="${s.winner_name||''}">🎬 PROYECTAR ${esc(s.winner_name||'GANADOR')}</button>`}</section>`}const thermo=t?`<section class="social-dj-block"><h3>🔥 ${esc(t.title)}</h3><small>${t.participants||0} participantes · ${esc(t.status)}</small>${resultBars(t.results,'option')}<div class="social-dj-actions">${t.status==='active'?`<button data-thermo-close="${t.id}">🏁 CERRAR</button>`:''}<button data-thermo-project="${t.id}">🎬 PROYECTAR RESULTADO</button></div></section>`:'';$('socialLiveDjState').innerHTML=star+thermo}
 async function call(fn,args){const {data,error}=await db.rpc(fn,args);if(error){alert(error.message);return null}await refresh();return data}
-function bind(){$('socialLiveGuest')?.addEventListener('click',e=>{let b=e.target.closest('[data-star-nominate]');if(b)return call('nominate_star_v544',{p_round_id:b.dataset.starNominate,p_visitor_id:visitor,p_nominee_name:$('starNominee').value,p_nominator_name:nick()||null});b=e.target.closest('[data-star-vote]');if(b)return call('vote_star_v544',{p_round_id:b.dataset.starVote,p_visitor_id:visitor,p_finalist_name:b.dataset.name});b=e.target.closest('[data-thermo-vote]');if(b)return call('vote_thermometer_v544',{p_round_id:b.dataset.thermoVote,p_visitor_id:visitor,p_option_value:b.dataset.option})});$('startStarMoment')?.addEventListener('click',()=>call('start_star_moment_v544',{p_event_id:eventId,p_title:$('starMomentTitle').value||'Momento Estrella'}));$('startThermoMood')?.addEventListener('click',()=>call('start_thermometer_v544',{p_event_id:eventId,p_mode:'mood',p_title:'¿Cómo está la fiesta?',p_options:['🥶 Hay que levantar','🙂 Vamos bien','🔥 Está prendida','🚀 ¡Estamos explotando!'],p_seconds:Number($('thermoSeconds').value)||60}));$('startThermoMusic')?.addEventListener('click',()=>call('start_thermometer_v544',{p_event_id:eventId,p_mode:'music',p_title:'¿Qué quieren ahora?',p_options:['🌴 Cumbia','🔥 Reggaetón','🪩 Retro','🎤 Para cantar','🎸 Rock / Pop','❤️ Románticas'],p_seconds:Number($('thermoSeconds').value)||60}));$('socialLiveDjState')?.addEventListener('click',djAction);$('refreshSocialLive')?.addEventListener('click',()=>refresh(true));
+function bind(){$('socialLiveGuest')?.addEventListener('click',async e=>{let b=e.target.closest('[data-star-nominate]');if(b)return call('nominate_star_v544',{p_round_id:b.dataset.starNominate,p_visitor_id:visitor,p_nominee_name:$('starNominee').value,p_nominator_name:nick()||null});b=e.target.closest('[data-star-vote]');if(b)return call('vote_star_v544',{p_round_id:b.dataset.starVote,p_visitor_id:visitor,p_finalist_name:b.dataset.name});b=e.target.closest('[data-thermo-vote]');if(b){
+
+  if(thermoVoteInFlight)return;
+
+  thermoVoteInFlight=true;
+
+  const buttons=[
+    ...document.querySelectorAll(
+      '[data-thermo-vote]'
+    )
+  ];
+
+  buttons.forEach(button=>{
+    button.disabled=true;
+  });
+
+  try{
+
+    const {error}=await db.rpc(
+      'vote_thermometer_v544',
+      {
+        p_round_id:b.dataset.thermoVote,
+        p_visitor_id:visitor,
+        p_option_value:b.dataset.option
+      }
+    );
+
+    if(error){
+
+      if(error.message.includes('poll_closed')){
+
+        alert(
+          '⏱️ Esta votación ya terminó.\n\n' +
+          'Esperando la próxima pregunta de Luis DJ.'
+        );
+
+      }else if(
+        error.message.includes('invalid_option')
+      ){
+
+        alert(
+          'Esta opción ya no pertenece a la votación actual. ' +
+          'Actualizando la información…'
+        );
+
+      }else if(
+        error.message.includes('poll_not_found')
+      ){
+
+        alert(
+          'Esta votación ya no está disponible.'
+        );
+
+      }else{
+
+        alert(error.message);
+
+      }
+    }
+
+    await refresh(true);
+
+  }finally{
+
+    thermoVoteInFlight=false;
+
+    document
+      .querySelectorAll('[data-thermo-vote]')
+      .forEach(button=>{
+        button.disabled=false;
+      });
+  }
+
+  return;
+}});$('startStarMoment')?.addEventListener('click',()=>call('start_star_moment_v544',{p_event_id:eventId,p_title:$('starMomentTitle').value||'Momento Estrella'}));$('startThermoMood')?.addEventListener('click',()=>call('start_thermometer_v544',{p_event_id:eventId,p_mode:'mood',p_title:'¿Cómo está la fiesta?',p_options:['🥶 Hay que levantar','🙂 Vamos bien','🔥 Está prendida','🚀 ¡Estamos explotando!'],p_seconds:Number($('thermoSeconds').value)||60}));$('startThermoMusic')?.addEventListener('click',()=>call('start_thermometer_v544',{p_event_id:eventId,p_mode:'music',p_title:'¿Qué quieren ahora?',p_options:['🌴 Cumbia','🔥 Reggaetón','🪩 Retro','🎤 Para cantar','🎸 Rock / Pop','❤️ Románticas'],p_seconds:Number($('thermoSeconds').value)||60}));$('socialLiveDjState')?.addEventListener('click',djAction);$('refreshSocialLive')?.addEventListener('click',()=>refresh(true));
 $('refreshSocialLiveDj')?.addEventListener('click',()=>refresh(true));$('cleanupSocialLive')?.addEventListener('click',async()=>{if(confirm('¿Eliminar Momento Estrella y Termómetro de este evento?'))await call('cleanup_social_live_v544',{p_event_id:eventId})})}
 async function project(payload){await call('project_social_live_v544',{p_event_id:eventId,p_payload:payload,p_seconds:15})}
 async function djAction(e){let b=e.target.closest('[data-star-finalists]');if(b){const names=[...document.querySelectorAll('[data-finalist]:checked')].map(x=>x.dataset.finalist).slice(0,5);if(names.length<2)return alert('Selecciona al menos 2 finalistas.');return call('set_star_finalists_v544',{p_round_id:b.dataset.starFinalists,p_finalists:names})}b=e.target.closest('[data-star-close]');if(b){const d=await call('close_star_moment_v544',{p_round_id:b.dataset.starClose});if(d?.winner_name)await project({icon:'👑',kicker:'MOMENTO ESTRELLA',title:d.winner_name,subtitle:'🔥 Está prendiendo la pista 🔥'});return}b=e.target.closest('[data-star-project-winner]');if(b)return project({icon:'👑',kicker:'MOMENTO ESTRELLA',title:b.dataset.starProjectWinner,subtitle:'🔥 Persona estrella de la fiesta 🔥'});b=e.target.closest('[data-thermo-close]');if(b)return call('close_thermometer_v544',{p_round_id:b.dataset.thermoClose});b=e.target.closest('[data-thermo-project]');if(b){const t=state.thermometer,top=(t.results||[]).slice(0,3),total=top.reduce((a,x)=>a+Number(x.count||0),0)||1;return project({icon:'🔥',kicker:'LA FIESTA HABLÓ',title:t.title,subtitle:top.map((x,i)=>`${['🥇','🥈','🥉'][i]} ${x.option} ${Math.round(x.count*100/total)}%`).join(' · ')})}}
