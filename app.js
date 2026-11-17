@@ -1,6 +1,6 @@
 // V5.33.3 UX Seleccion Musical
 'use strict';
-  const APP_VERSION="5.43";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
+  const APP_VERSION="5.44";let pendingSw=null,updateReloading=false,screenUpdateTimer=null;
   function projectionActive(){return Boolean((el.screenDjAd&&!el.screenDjAd.hidden)||(el.screenPartyPhoto&&!el.screenPartyPhoto.hidden)||(el.screenPartyGreeting&&!el.screenPartyGreeting.hidden)||(el.screenKaraoke&&!el.screenKaraoke.hidden)||(el.screenDedication&&!el.screenDedication.hidden))}
   function reloadForUpdate(){
   if(updateReloading)return;
