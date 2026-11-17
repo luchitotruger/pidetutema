@@ -11,8 +11,14 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
  const isPushTest=notification_type==='push_test'
  if(isPushTest){
   const visitor=String(target_visitor_id||'').trim();if(!visitor)throw new Error('Falta dispositivo para la prueba');if(!event.is_active)throw new Error('Evento no disponible')
-  const since=new Date(Date.now()-30000).toISOString();const {count}=await admin.from('push_test_log').select('*',{count:'exact',head:true}).eq('event_id',event_id).eq('visitor_id',visitor).gte('created_at',since);if((count||0)>0)throw new Error('Espera 30 segundos antes de repetir la prueba')
-  await admin.from('push_test_log').insert({event_id,visitor_id:visitor})
+  const {error:testError}=await admin.rpc(
+    'register_push_test_v54461',
+    {
+      p_event_id:event_id,
+      p_visitor_id:visitor
+    }
+  )
+  if(testError)throw testError
  }else{
   if(!jwt.sub||jwt.role!=='authenticated')throw new Error('Usuario DJ no autenticado');if(event.owner_id!==jwt.sub)throw new Error('No eres propietario del evento')
  }

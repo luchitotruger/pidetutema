@@ -122,7 +122,89 @@ async function enablePartyPush(){try{if(isAppleMobile()&&!isStandaloneWebApp()){
 async function disablePartyPush(){try{const sub=await getPushSubscription();await db.rpc('disable_visitor_push_v5446',{p_event_id:eventId,p_visitor_id:visitorToken});if(sub)await sub.unsubscribe();paintPushState(false,'Avisos Push desactivados.');paintPushHealth('idle','⚪ Push desactivado')}catch(e){el.partyPushNotice.textContent=e.message}}
 async function refreshPushState(){if(!el.partyPushState||session)return;await pushHealthCheck(true)}
 async function repairPartyPush(){if(!eventId)return;el.repairPartyPush.disabled=true;el.testPartyPush.disabled=true;el.partyPushNotice.textContent='Reparando registro Push…';paintPushHealth('warning','🟡 Reparando avisos');try{if(Notification.permission==='denied')throw new Error('Las notificaciones están bloqueadas. Habilítalas en la configuración del navegador.');if(Notification.permission!=='granted'){const p=await Notification.requestPermission();if(p!=='granted')throw new Error('Permiso de notificaciones no concedido.')}const reg=await getPushRegistration(),old=await reg.pushManager.getSubscription();await db.rpc('disable_visitor_push_v5446',{p_event_id:eventId,p_visitor_id:visitorToken});if(old)await old.unsubscribe();const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlBase64ToUint8Array(cfg.VAPID_PUBLIC_KEY)});await savePushSubscription(sub);await pushHealthCheck(false);toast('🔧 Avisos reparados','Nueva suscripción registrada','success')}catch(e){paintPushHealth('error','🔴 Reparación pendiente');el.partyPushNotice.textContent=e.message;toast('No se pudo reparar',e.message,'error')}finally{el.repairPartyPush.disabled=false;el.testPartyPush.disabled=false}}
-async function testPartyPush(){el.testPartyPush.disabled=true;el.partyPushNotice.textContent='Enviando prueba a este dispositivo…';try{const ready=await pushHealthCheck(true);if(!ready)throw new Error('Primero activa o repara los avisos.');const {data,error}=await db.functions.invoke('send-event-push',{body:{event_id:eventId,message:'¡Perfecto! Recibirás los avisos de esta fiesta 🎉',priority:'important',duration_seconds:10,sound_enabled:true,target_visitor_id:visitorToken,notification_type:'push_test',title:'✅ Pide Tu Tema'}});if(error||!data?.ok)throw new Error(data?.error||error?.message||'No se pudo enviar la prueba');if(!data.sent)throw new Error('La prueba no pudo entregarse. Pulsa Reparar avisos.');el.partyPushNotice.textContent='✅ Prueba enviada. Revisa la notificación del teléfono.';toast('📲 Push de prueba enviado','Solo a este dispositivo','success')}catch(e){paintPushHealth('error','🔴 Prueba no confirmada');el.partyPushNotice.textContent=e.message;toast('Prueba no enviada',e.message,'error')}finally{el.testPartyPush.disabled=false}}
+async function testPartyPush(){
+  el.testPartyPush.disabled=true;
+  el.partyPushNotice.textContent='Enviando prueba a este dispositivo…';
+
+  try{
+    const ready=await pushHealthCheck(true);
+
+    if(!ready){
+      throw new Error('Primero activa o repara los avisos.');
+    }
+
+    const sub=await getPushSubscription();
+
+    if(!sub){
+      throw new Error(
+        'No existe una suscripción Push activa. Pulsa Reparar avisos.'
+      );
+    }
+
+    const {data,error}=await db.functions.invoke(
+      'send-event-push',
+      {
+        body:{
+          event_id:eventId,
+          message:'¡Perfecto! Recibirás los avisos de esta fiesta 🎉',
+          priority:'important',
+          duration_seconds:10,
+          sound_enabled:true,
+          target_visitor_id:visitorToken,
+          test_endpoint:sub.endpoint,
+          notification_type:'push_test',
+          title:'✅ Pide Tu Tema'
+        }
+      }
+    );
+
+    if(error||!data?.ok){
+      throw new Error(
+        data?.error ||
+        error?.message ||
+        'No se pudo enviar la prueba'
+      );
+    }
+
+    if(!data.sent){
+      throw new Error(
+        'La prueba no pudo entregarse. Pulsa Reparar avisos.'
+      );
+    }
+
+    el.partyPushNotice.textContent=
+      '✅ Prueba enviada. Revisa la notificación del teléfono.';
+
+    paintPushHealth(
+      'ok',
+      '🟢 Push operativo'
+    );
+
+    toast(
+      '📲 Push de prueba enviado',
+      'Solo a este dispositivo',
+      'success'
+    );
+
+  }catch(e){
+
+    paintPushHealth(
+      'error',
+      '🔴 Prueba no confirmada'
+    );
+
+    el.partyPushNotice.textContent=e.message;
+
+    toast(
+      'Prueba no enviada',
+      e.message,
+      'error'
+    );
+
+  }finally{
+    el.testPartyPush.disabled=false;
+  }
+}
 const announcementTemplates=[['💍','En 5 minutos comienza el vals de los novios'],['🎂','¡Nos preparamos para cantar Cumpleaños Feliz!'],['🎁','Comienza la apertura de regalos'],['💐','Solteras a la pista: lanzamiento del ramo'],['🥂','Prepárense para el brindis'],['📸','Todos atentos para la fotografía grupal'],['🏆','¡Atención! Comienza el concurso'],['💃','¡Todos a la pista!'],['🍽️','Cena / comida disponible'],['🎉','Tenemos una sorpresa']];
 function announcementPattern(priority){return priority==='urgent'?[500,150,500,150,700]:priority==='important'?[300,120,300,120,300]:[200,100,200]}
 function announcementIcon(priority){return priority==='urgent'?'🚨':priority==='important'?'⚠️':'📣'}
