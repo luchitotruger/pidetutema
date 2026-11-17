@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://itunes.apple.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css?v=5.42">
+  <link rel="stylesheet" href="styles.css?v=5.43">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -198,7 +198,7 @@
           <div id="analyticsUpdated" class="analytics-updated"></div>
         </div>
       </section>
-      <section class="card party-summary" aria-labelledby="partySummaryTitle">
+      <section id="eventCleanupCenter" class="card event-cleanup-center"><div class="section-head"><div><small>V5.43 · GESTIÓN DE DATOS</small><h2>🧹 Centro de Limpieza del Evento</h2></div><button id="refreshEventCleanup" class="icon-button" type="button">↻</button></div><div id="eventCleanupTitle" class="cleanup-event-title">Evento actual</div><div id="eventCleanupKpis" class="cleanup-kpis"></div><div class="cleanup-total"><span>📦 Registros operacionales</span><strong id="cleanupTotalRows">0</strong><span>📸 Storage fotos</span><strong id="cleanupPhotoBytes">0 MB</strong></div><div id="cleanupModules" class="cleanup-modules"></div><section class="cleanup-danger-zone"><small>🏁 EVENTO FINALIZADO</small><h3>Cerrar y limpiar datos operacionales</h3><p>Se conserva el evento, nombre, fecha, tema, configuración, publicidad DJ y un resumen histórico. La eliminación no se puede deshacer.</p><button id="cleanupAllEvent" class="tool-button danger" type="button">🧹 CERRAR Y LIMPIAR EVENTO</button></section><div id="eventCleanupNotice" class="notice"></div></section><section class="card party-summary" aria-labelledby="partySummaryTitle">
         <div class="section-head"><div><small>RESUMEN EN VIVO</small><h2 id="partySummaryTitle">📊 Resumen de la fiesta</h2></div><button id="toggleSummary" class="icon-button" type="button" aria-expanded="true">Ocultar</button></div>
         <div id="summaryContent">
           <div class="summary-grid">
@@ -228,7 +228,7 @@
       </section>
       <div class="card"><div class="section-head"><div><small>CONTROL DE LA PISTA</small><h2>Pedidos en vivo</h2></div><select id="statusFilter" aria-label="Filtrar estado"><option value="all">Todos</option><option value="pending">Pendientes</option><option value="accepted">En lista</option><option value="next">Próximas</option><option value="playing">Sonando</option><option value="played">Reproducidas</option></select></div><div id="djList" class="song-list"></div></div>
     </section>
-    <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨ · <span id="appVersionLabel">V5.42.1</span></footer>
+    <footer>Catálogo musical: iTunes · Pide · Vota · Baila ✨ · <span id="appVersionLabel">V5.43</span></footer>
   </main>
 
   <section id="screenMode" class="screen-mode" hidden aria-label="Modo pantalla">
@@ -269,5 +269,5 @@
     </div>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="config.js"></script><script src="app.js?v=5.42"></script><script src="party-games-v542.js?v=5.42.1"></script>
+  <script src="config.js"></script><script src="app.js?v=5.43"></script><script src="party-games-v542.js?v=5.42.1"></script>
 </body></html>
