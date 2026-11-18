@@ -1429,7 +1429,14 @@ function stopCoreRealtimeFallback(){
 }
 
 async function handleRealtime(payload){if(payload.eventType==='INSERT'&&initialized){const x=payload.new;beep();toast('🎵 Nueva canción',`${x.title}${x.artist?' · '+x.artist:''}`,'success');browserNotify('Nueva canción solicitada',`${x.title}${x.requester_name?' · '+x.requester_name:''}`);if(session&&el.dj.hidden){unseen++;updateBadge()}}if(payload.eventType==='UPDATE'&&payload.new.status==='playing'&&payload.old.status!=='playing'){partyShowNow();toast('🔊 Ahora suena',`${payload.new.title}${payload.new.artist?' · '+payload.new.artist:''}`,'success')}if(payload.eventType==='UPDATE'&&payload.old.status!==payload.new.status)notifyMySongStatus(payload.new);await refreshRows();await loadMyActivity();await loadGuestGame();await loadSmartRanking();await loadGameLeaderboard()}
-async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at,artwork_url,external_track_id,source,external_url').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);setConnection(false,'Sin conexión');return}rows=data||[];initialized=true;render();renderQuickMusicStart();updateMobileMiniPlayer();updateContextualSheet();await loadLiveExperience();await loadReactions();await loadAnnouncements();await loadSocialExperience()}
+async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at,artwork_url,external_track_id,source,external_url').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);setConnection(false,'Sin conexión');return}rows=data||[];initialized=true;render();renderQuickMusicStart();updateMobileMiniPlayer();updateContextualSheet();await loadLiveExperience();await loadReactions();await loadAnnouncements();
+await loadSocialExperience();
+
+if(screenModeActive){
+  renderScreenMode();
+  renderPartyScene();
+}
+}
 function handleEventRealtime(payload){syncProjectedPhoto();syncProjectedGreeting();syncProjectedKaraoke();projectorState.featured_request_id=payload.new.featured_request_id||null;syncDedicationControl();renderScreenMode()}
 async function setProjectedDedication(requestId){if(!session||!eventId)return;const {error}=await db.rpc('set_featured_dedication',{p_event_id:eventId,p_request_id:requestId||null});if(error){toast('No se pudo actualizar la pantalla',error.message,'error');return}projectorState.featured_request_id=requestId||null;syncDedicationControl();renderScreenMode();toast(requestId?'💬 Dedicatoria enviada a pantalla':'↩ Pantalla volvió a Sonando ahora','Actualización realizada','success')}
 // ===== V5.0.5 PANTALLA FIESTA =====
