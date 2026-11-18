@@ -829,6 +829,37 @@ async function preparePartyPhoto(file,status){
   }
 }
 
+// PHOTO_ACTIVE_ROUND_V54631
+async function resolveActivePhotoRound(){
+
+  const {data,error}=await db.rpc(
+    'get_social_experience_v530',
+    {
+      p_event_id:eventId,
+      p_visitor_id:visitorToken
+    }
+  );
+
+  if(error){
+    throw new Error(
+      'No pudimos comprobar Foto del Momento: ' +
+      error.message
+    );
+  }
+
+  const activePhoto=
+    (data?.rounds||[])
+      .find(round=>round.kind==='photo');
+
+  if(!activePhoto?.id){
+    throw new Error(
+      'Foto del Momento ya no está activa. Actualiza la fiesta.'
+    );
+  }
+
+  return activePhoto.id;
+}
+
 async function uploadPartyPhoto(roundId,file){
 
   const status=
@@ -843,6 +874,32 @@ async function uploadPartyPhoto(roundId,file){
   const originalSize=file.size;
 
   try{
+
+    status.textContent=
+      '🔎 Comprobando Foto del Momento…';
+
+    /*
+     * No confiamos en el roundId que estaba
+     * renderizado en el celular.
+     *
+     * Consultamos nuevamente la ronda activa
+     * justo antes de subir.
+     */
+    const activeRoundId=
+      await resolveActivePhotoRound();
+
+    if(activeRoundId!==roundId){
+
+      console.info(
+        'Foto del Momento: ronda actualizada',
+        {
+          anterior:roundId,
+          activa:activeRoundId
+        }
+      );
+
+      roundId=activeRoundId;
+    }
 
     const prepared=await preparePartyPhoto(
       file,
