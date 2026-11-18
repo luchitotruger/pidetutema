@@ -992,7 +992,7 @@ async function uploadPartyPhoto(roundId,file){
 async function signedPartyPhoto(path){const {data,error}=await db.storage.from('party-photos').createSignedUrl(path,300);return error?null:data.signedUrl}
 async function loadPartyPhotos(){if(!db||!eventId)return;if(!session){return}const {data,error}=await db.rpc('get_party_photos_v5301',{p_event_id:eventId,p_moderation:true});if(error){console.warn('Fotos V5.30.1:',error.message);return}const all=data||[];partyPhotoState.pending=all.filter(x=>x.status==='pending');partyPhotoState.approved=all.filter(x=>x.status==='approved');el.partyPhotoModeration.hidden=!(socialState.rounds.some(x=>x.kind==='photo')||all.length);el.partyPhotoPendingCount.textContent=partyPhotoState.pending.length;const render=async(list,approved)=>{const rows=[];for(const x of list){const url=await signedPartyPhoto(x.storage_path);if(url)rows.push(`<article class="party-photo-item" data-photo-id="${x.id}"><img src="${url}" alt="Foto de invitado">${approved?'':`<div class="party-photo-actions"><button data-photo-moderate="approved" data-photo-id="${x.id}">✅</button><button data-photo-moderate="rejected" data-photo-id="${x.id}">❌</button></div>`}${approved?`<div class="party-photo-actions"><button data-project-photo="${x.id}">🎬 Proyectar</button><button data-clear-photo="1">⏹ Quitar</button><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`:`<div class="party-photo-delete-row"><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`}</article>`)}return rows.join('')};el.partyPhotoQueue.innerHTML=await render(partyPhotoState.pending,false)||'<div class="summary-empty">Sin fotos pendientes.</div>';el.partyPhotoApproved.innerHTML=await render(partyPhotoState.approved,true)||'<div class="summary-empty">Sin fotos aprobadas.</div>';await loadPartyPhotoStats()}
 async function moderatePartyPhoto(id,status){const {error}=await db.rpc('moderate_party_photo_v5301',{p_photo_id:id,p_status:status});if(error){toast('No se pudo moderar',error.message,'error');return}toast(status==='approved'?'✅ Foto aprobada':'❌ Foto rechazada','',status==='approved'?'success':'info');await loadPartyPhotos()}
-async function projectPartyPhoto(id){const x=partyPhotoState.approved.find(p=>p.id===id);if(!x){toast('Foto no disponible','','error');return}const {error}=await db.rpc('project_party_photo_v5302',{p_event_id:eventId,p_photo_id:id,p_seconds:30});if(error){toast('No se pudo proyectar',error.message,'error');return}toast('🎬 Foto enviada a Pantalla Fiesta','Se mostrará durante 15 segundos','success');await syncProjectedPhoto()}
+async function projectPartyPhoto(id){const x=partyPhotoState.approved.find(p=>p.id===id);if(!x){toast('Foto no disponible','','error');return}const {error}=await db.rpc('project_party_photo_v5302',{p_event_id:eventId,p_photo_id:id,p_seconds:30});if(error){toast('No se pudo proyectar',error.message,'error');return}toast('🎬 Foto enviada a Pantalla Fiesta','Se mostrará durante 30 segundos','success');await syncProjectedPhoto()}
 async function clearProjectedPartyPhoto(){const {error}=await db.rpc('clear_projected_photo_v5302',{p_event_id:eventId});if(error){toast('No se pudo quitar',error.message,'error');return}toast('⏹ Foto retirada de Pantalla Fiesta','','success');hideProjectedPartyPhoto()}
 function hideProjectedPartyPhoto(){
   if(el.screenPartyPhoto)el.screenPartyPhoto.hidden=true;
@@ -1010,12 +1010,45 @@ function hideProjectedPartyPhoto(){
     partyRestartTimer();
   }
 }
-async function syncProjectedPhoto(){
+// PHOTO_SCREEN_ROBUST_V54632
+let photoScreenPoll=null;
+let photoScreenRequestInFlight=false;
+let photoScreenLastRequest=0;
+
+async function syncProjectedPhoto(force=false){
   if(!db||!eventId||!el.screenPartyPhoto)return;
 
-  const {data,error}=await db.functions.invoke('get-projected-photo',{
-    body:{event_id:eventId}
-  });
+  const now=Date.now();
+
+  if(photoScreenRequestInFlight)return;
+
+  if(
+    !force &&
+    now-photoScreenLastRequest < 1500
+  )return;
+
+  photoScreenRequestInFlight=true;
+  photoScreenLastRequest=now;
+
+  let data=null;
+  let error=null;
+
+  try{
+    const result=await db.functions.invoke(
+      'get-projected-photo',
+      {
+        body:{
+          event_id:eventId
+        }
+      }
+    );
+
+    data=result.data;
+    error=result.error;
+
+  }finally{
+    photoScreenRequestInFlight=false;
+  }
 
   if(error||!data?.ok||!data?.photo){
     hideProjectedPartyPhoto();
@@ -1048,6 +1081,36 @@ async function syncProjectedPhoto(){
     }
   },ms||15000);
 }
+
+function startPhotoScreenPolling(){
+
+  if(photoScreenPoll)return;
+
+  // Consulta inmediata al abrir Pantalla Fiesta.
+  syncProjectedPhoto(true);
+
+  photoScreenPoll=setInterval(()=>{
+
+    if(
+      screenModeActive &&
+      !document.hidden
+    ){
+      syncProjectedPhoto();
+    }
+
+  },5000);
+}
+
+function stopPhotoScreenPolling(){
+
+  if(photoScreenPoll){
+    clearInterval(photoScreenPoll);
+  }
+
+  photoScreenPoll=null;
+  photoScreenRequestInFlight=false;
+}
+
 async function loadAnnouncements(){if(!db||!eventId)return;const {data,error}=await db.rpc('get_announcements_v523',{p_event_id:eventId,p_visitor_id:visitorToken});if(error){console.warn('Avisos V5.23:',error.message);return}const d=data||{};announcementState.active=d.active||null;if(!session&&announcementState.active&&announcementState.active.id!==announcementState.shownId)showAnnouncement(announcementState.active);if(session)renderAnnouncementHistory(d.history||[])}
 function showAnnouncement(a){announcementState.shownId=a.id;clearTimeout(announcementState.timer);clearTimeout(announcementState.reminder);el.announcementCard.className=`announcement-card ${a.priority}`;el.announcementOverlayIcon.textContent=announcementIcon(a.priority);el.announcementOverlayKicker.textContent=a.priority==='urgent'?'AVISO URGENTE':a.priority==='important'?'AVISO IMPORTANTE':'AVISO DEL DJ';el.announcementOverlayMessage.textContent=a.message;el.announcementOverlayHint.textContent='Luis DJ · Atención a la fiesta';el.announcementOverlay.hidden=false;vibrateParty(announcementPattern(a.priority));if(a.sound_enabled)playAnnouncementTone(a.priority);db.rpc('mark_announcement_seen_v523',{p_announcement_id:a.id,p_visitor_id:visitorToken}).catch(()=>{});addPartyNotification('announcement',el.announcementOverlayKicker.textContent,a.message);const ms=Number(a.duration_seconds)||0;if(ms>0)announcementState.timer=setTimeout(()=>{el.announcementOverlay.hidden=true},ms*1000);if(a.priority!=='general')announcementState.reminder=setTimeout(()=>{if(!el.announcementOverlay.hidden){vibrateParty(a.priority==='urgent'?[300,120,400]:[180,100,180]);if(a.sound_enabled)playAnnouncementTone('general')}},5000)}
 async function acknowledgeAnnouncement(){const a=announcementState.active;if(!a)return;const {error}=await db.rpc('ack_announcement_v523',{p_announcement_id:a.id,p_visitor_id:visitorToken});if(error)return;clearTimeout(announcementState.timer);clearTimeout(announcementState.reminder);el.announcementOverlay.hidden=true;haptic('reaction')}
@@ -1200,21 +1263,23 @@ function partyShowNow(){partyScreen.index=partyScreen.scenes.indexOf('now');rend
 function screenVisibleRows(){return rows.filter(x=>x.status!=='played'&&x.status!=='rejected')}
 function renderScreenMode(){if(!el.screenMode)return;renderScreenQr();renderPartyScene();const playing=currentPlayingSong(),visible=screenVisibleRows(),featured=projectorState.featured_request_id?rows.find(x=>x.id===projectorState.featured_request_id):null;if(playing){const artwork=playing.artwork_url?`<img src="${esc(playing.artwork_url)}" alt="">`:'<div class="screen-artwork-fallback">🎵</div>';el.screenNow.innerHTML=`<div class="screen-artwork">${artwork}</div><div class="screen-now-copy"><span class="screen-now-label">🔊 SONANDO AHORA</span><h2>${esc(playing.title)}</h2><div class="screen-now-artist">${esc(playing.artist||'Artista por confirmar')}</div>${playing.requester_name?`<div class="screen-now-meta">🎉 Pedida por ${esc(playing.requester_name)}</div>`:''}${playing.message?`<div class="screen-now-message">💬 “${esc(playing.message)}”</div>`:''}</div>`}else{el.screenNow.innerHTML='<div class="screen-idle"><div class="screen-idle-icon">🎧</div><h2>La fiesta sigue</h2><p>Pide tu canción y vota por tus favoritas</p></div>'}el.screenTop3.innerHTML=visible.length?visible.slice(0,3).map((x,i)=>`<div class="screen-rank-row"><span class="screen-medal">${['🥇','🥈','🥉'][i]}</span><span><b>${esc(x.title)}</b><small>${esc(x.artist||'Artista por confirmar')}</small></span><span class="screen-rank-votes">♥ ${x.votes}</span></div>`).join(''):'<div class="summary-empty">Esperando las primeras canciones…</div>';const showFeatured=Boolean(featured&&featured.message&&featured.message.trim());el.screenDedication.hidden=!showFeatured;if(showFeatured){el.screenDedicationArtwork.innerHTML=featured.artwork_url?`<img src="${esc(featured.artwork_url)}" alt="">`:'<div class="screen-artwork-fallback">🎵</div>';el.screenDedicationSong.textContent=`${featured.title} · ${featured.artist||'Artista por confirmar'}`;el.screenDedicationMessage.textContent=`“${featured.message.trim()}”`;el.screenDedicationRequester.textContent=featured.requester_name?`🎉 De ${featured.requester_name}`:'🎉 De un invitado'}}
 function startScreenClock(){clearInterval(screenClockTimer);const tick=()=>{el.screenClock.textContent=new Date().toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'})};tick();screenClockTimer=setInterval(tick,30000)}
-function openScreenMode(){screenModeActive=true;el.screenMode.hidden=false;partyRestartTimer();startKaraokeProjectionPolling();startGreetingScreenPolling();document.body.classList.add('screen-active');const u=new URL(location.href);u.searchParams.set('modo','pantalla');history.replaceState({},'',u);startScreenClock();renderScreenMode()}
+function openScreenMode(){screenModeActive=true;el.screenMode.hidden=false;partyRestartTimer();startKaraokeProjectionPolling();startGreetingScreenPolling();startPhotoScreenPolling();document.body.classList.add('screen-active');const u=new URL(location.href);u.searchParams.set('modo','pantalla');history.replaceState({},'',u);startScreenClock();renderScreenMode()}
 document.addEventListener('visibilitychange',()=>{
   if(!screenModeActive) return;
 
   if(document.hidden){
     stopKaraokeProjectionPolling();
+    stopPhotoScreenPolling();
   }else{
-    syncProjectedPhoto();
+    syncProjectedPhoto(true);
     syncProjectedGreeting();
     syncProjectedKaraoke();
     startKaraokeProjectionPolling();
+    startPhotoScreenPolling();
   }
 });
 
-function closeScreenMode(){screenModeActive=false;stopKaraokeProjectionPolling();stopGreetingScreenPolling();el.screenMode.hidden=true;document.body.classList.remove('screen-active');clearInterval(screenClockTimer);const u=new URL(location.href);u.searchParams.delete('modo');history.replaceState({},'',u)}
+function closeScreenMode(){screenModeActive=false;stopKaraokeProjectionPolling();stopGreetingScreenPolling();stopPhotoScreenPolling();el.screenMode.hidden=true;document.body.classList.remove('screen-active');clearInterval(screenClockTimer);const u=new URL(location.href);u.searchParams.delete('modo');history.replaceState({},'',u)}
 function currentPlayingSong(){return rows.find(x=>x.status==='playing')||null}
 function syncDedicationControl(){if(!el.highlightDedication)return;const song=currentPlayingSong(),available=Boolean(session&&song&&song.message&&song.message.trim());el.highlightDedication.disabled=!available;el.highlightDedication.textContent=available?'💬 Destacar dedicatoria':song?'💬 Sin dedicatoria':'💬 Destacar dedicatoria';el.clearProjectedDedication.disabled=!Boolean(session&&projectorState.featured_request_id)}
 function showDedicationSpotlight(){const song=currentPlayingSong();if(!song||!song.message||!song.message.trim())return;setProjectedDedication(song.id);el.dedicationMessage.textContent=song.message.trim();el.dedicationRequester.textContent=song.requester_name?`🎉 De ${song.requester_name}`:'🎉 De un invitado';el.dedicationArtist.textContent=song.artist||'Artista por confirmar';document.getElementById('dedicationSpotlightTitle').textContent=song.title;el.dedicationArtwork.innerHTML=song.artwork_url?`<img src="${esc(song.artwork_url)}" alt="">`:'<span>🎵</span>';el.dedicationSpotlight.hidden=false}
