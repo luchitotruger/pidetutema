@@ -217,7 +217,7 @@ const SOCIAL_LABELS={tables:'👫 Mesa',roulette:'🎲 Ruleta',genres:'🎸 Gén
 let socialState={rounds:[],stats:[]};
 let partyPhotoState={pending:[],approved:[],selected:null,projectTimer:null};
 function socialOptions(r){if(r.kind==='genres'||r.kind==='mood'||r.kind==='guess')return r.config?.options||['Cumbia','Reggaetón','Retro','Para cantar'];if(r.kind==='roulette')return r.config?.options||['💃 Baila','❤️ Dedica un tema','🎤 Canta el coro','🔥 Vota por 3 canciones','📸 Sácate una foto','🎁 Sorpresa DJ'];return[]}
-function renderSocialGuest(){if(!el.socialPartyGuest)return;el.socialPartyGuest.hidden=!socialState.rounds.length;el.socialPartyGuestList.innerHTML=socialState.rounds.map(r=>{const opts=socialOptions(r);if(r.kind==='tables')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>Representa a tu mesa con una canción.</p><div class="social-table-form"><input data-social-table placeholder="Mesa / grupo"><input data-social-song placeholder="Canción representante"></div><button class="primary" data-social-submit="${r.id}" data-social-kind="tables">REPRESENTAR MI MESA</button></article>`;if(r.kind==='dance')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>¿Te sumas?</p><div class="social-options"><button data-social-entry="join" data-social-round="${r.id}">🙋 YO PARTICIPO</button></div></article>`;if(r.kind==='photo')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>Toma o elige una foto. Máximo 5 MB. El DJ debe aprobarla antes de proyectarla.</p><div class="party-photo-upload"><input type="file" accept="image/jpeg,image/png,image/webp" data-party-photo-input="${r.id}"><label class="party-photo-picker" data-party-photo-pick="${r.id}"><span>📸</span><b>Tomar / elegir foto</b><small>JPG, PNG o WebP · máximo 5 MB</small></label><div class="interaction-status" data-party-photo-status="${r.id}"></div></div></article>`;return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><div class="social-options">${opts.map((o,i)=>`<button data-social-entry="${esc(String(o))}" data-social-round="${r.id}">${esc(String(o))}</button>`).join('')}</div></article>`}).join('')}
+function renderSocialGuest(){if(!el.socialPartyGuest)return;el.socialPartyGuest.hidden=!socialState.rounds.length;el.socialPartyGuestList.innerHTML=socialState.rounds.map(r=>{const opts=socialOptions(r);if(r.kind==='tables')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>Representa a tu mesa con una canción.</p><div class="social-table-form"><input data-social-table placeholder="Mesa / grupo"><input data-social-song placeholder="Canción representante"></div><button class="primary" data-social-submit="${r.id}" data-social-kind="tables">REPRESENTAR MI MESA</button></article>`;if(r.kind==='dance')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>¿Te sumas?</p><div class="social-options"><button data-social-entry="join" data-social-round="${r.id}">🙋 YO PARTICIPO</button></div></article>`;if(r.kind==='photo')return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><p>Toma o elige una foto. Máximo 5 MB. El DJ debe aprobarla antes de proyectarla.</p><div class="party-photo-upload"><input type="file" accept="image/*" data-party-photo-input="${r.id}"><label class="party-photo-picker" data-party-photo-pick="${r.id}"><span>📸</span><b>Tomar / elegir foto</b><small>JPG, PNG o WebP · máximo 5 MB</small></label><div class="interaction-status" data-party-photo-status="${r.id}"></div></div></article>`;return `<article class="social-round"><h3>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</h3><div class="social-options">${opts.map((o,i)=>`<button data-social-entry="${esc(String(o))}" data-social-round="${r.id}">${esc(String(o))}</button>`).join('')}</div></article>`}).join('')}
 function renderSocialAdmin(){if(!el.socialAdminActive)return;el.socialAdminActive.innerHTML=socialState.rounds.length?socialState.rounds.map(r=>{const total=socialState.stats.filter(x=>x.round_id===r.id).reduce((a,x)=>a+Number(x.value||0),0);return `<div class="social-admin-row"><span><b>${SOCIAL_LABELS[r.kind]} · ${esc(r.title)}</b><small>${total} participaciones</small></span><button class="tool-button" data-social-close="${r.id}">Cerrar</button></div>`}).join(''):'<div class="summary-empty">No hay experiencias sociales activas.</div>'}
 async function loadSocialExperience(){if(!db||!eventId)return;const {data,error}=await db.rpc('get_social_experience_v530',{p_event_id:eventId,p_visitor_id:visitorToken});if(error){console.warn('Social V5.30:',error.message);return}socialState=data||{rounds:[],stats:[]};renderSocialGuest();renderSocialAdmin();refreshMyPartyHub();if(session){await loadPartyPhotos();await loadPartyGreetings()}}
 async function submitSocialEntry(roundId,key,payload={}){const {error}=await db.rpc('submit_social_entry_v530',{p_round_id:roundId,p_visitor_id:visitorToken,p_entry_key:key,p_display_name:getGuestNickname()||null,p_payload:payload});if(error){toast('No se pudo participar',error.message,'error');return}haptic('reaction');toast('🎉 Participación registrada','¡Gracias por jugar!','success');await loadSocialExperience()}
@@ -661,7 +661,277 @@ function stopGreetingScreenPolling(){
 
   greetingScreenRequestInFlight=false;
 }
-async function uploadPartyPhoto(roundId,file){const status=el.socialPartyGuestList.querySelector(`[data-party-photo-status="${roundId}"]`);if(!file){return}const ext=photoExt(file);if(!ext){status.textContent='Formato no permitido.';return}if(file.size>5*1024*1024){status.textContent='La foto supera 5 MB.';return}status.textContent='Subiendo foto…';const path=`${eventId}/${roundId}/${visitorToken}-${crypto.randomUUID()}.${ext}`;const {error:up}=await db.storage.from('party-photos').upload(path,file,{contentType:file.type,upsert:false,cacheControl:'3600'});if(up){status.textContent='No se pudo subir: '+up.message;return}const {error}=await db.rpc('register_party_photo_v5301',{p_round_id:roundId,p_visitor_id:visitorToken,p_storage_path:path});if(error){await db.storage.from('party-photos').remove([path]).catch(()=>{});status.textContent=error.message.includes('photo_limit')?'Máximo 3 fotos por ronda.':error.message;return}status.textContent='✅ Foto enviada. Esperando aprobación del DJ.';haptic('reaction');toast('📸 Foto enviada','Será visible solo si el DJ la aprueba','success')}
+// PHOTO_MOBILE_ROBUST_V5463
+function photoSizeLabel(bytes){
+  const value=Number(bytes)||0;
+
+  if(value<1024){
+    return `${value} B`;
+  }
+
+  if(value<1024*1024){
+    return `${(value/1024).toFixed(1)} KB`;
+  }
+
+  return `${(value/(1024*1024)).toFixed(1)} MB`;
+}
+
+async function preparePartyPhoto(file,status){
+
+  if(!file){
+    throw new Error('No se seleccionó una fotografía.');
+  }
+
+  if(
+    !String(file.type||'').startsWith('image/')
+  ){
+    throw new Error(
+      'El archivo seleccionado no es una imagen válida.'
+    );
+  }
+
+  status.textContent=
+    `📸 Preparando fotografía · ${photoSizeLabel(file.size)}…`;
+
+  let bitmap=null;
+  let objectUrl=null;
+
+  try{
+
+    if('createImageBitmap' in window){
+      bitmap=await createImageBitmap(
+        file,
+        {
+          imageOrientation:'from-image'
+        }
+      );
+    }else{
+      objectUrl=URL.createObjectURL(file);
+
+      bitmap=await new Promise((resolve,reject)=>{
+        const image=new Image();
+
+        image.onload=()=>resolve(image);
+        image.onerror=()=>reject(
+          new Error('No pudimos leer esta fotografía.')
+        );
+
+        image.src=objectUrl;
+      });
+    }
+
+    const sourceWidth=
+      bitmap.naturalWidth ||
+      bitmap.width;
+
+    const sourceHeight=
+      bitmap.naturalHeight ||
+      bitmap.height;
+
+    if(!sourceWidth || !sourceHeight){
+      throw new Error(
+        'No pudimos determinar el tamaño de la fotografía.'
+      );
+    }
+
+    const maxSide=1600;
+
+    const scale=Math.min(
+      1,
+      maxSide/Math.max(
+        sourceWidth,
+        sourceHeight
+      )
+    );
+
+    const width=Math.max(
+      1,
+      Math.round(sourceWidth*scale)
+    );
+
+    const height=Math.max(
+      1,
+      Math.round(sourceHeight*scale)
+    );
+
+    const canvas=document.createElement('canvas');
+
+    canvas.width=width;
+    canvas.height=height;
+
+    const context=canvas.getContext(
+      '2d',
+      {
+        alpha:false
+      }
+    );
+
+    if(!context){
+      throw new Error(
+        'Este navegador no pudo preparar la fotografía.'
+      );
+    }
+
+    context.fillStyle='#000';
+    context.fillRect(
+      0,
+      0,
+      width,
+      height
+    );
+
+    context.drawImage(
+      bitmap,
+      0,
+      0,
+      width,
+      height
+    );
+
+    const blob=await new Promise(resolve=>{
+      canvas.toBlob(
+        resolve,
+        'image/jpeg',
+        0.82
+      );
+    });
+
+    if(!blob){
+      throw new Error(
+        'No pudimos comprimir la fotografía.'
+      );
+    }
+
+    if(blob.size>5*1024*1024){
+      throw new Error(
+        `La fotografía preparada todavía pesa ${photoSizeLabel(blob.size)}. El máximo permitido es 5 MB.`
+      );
+    }
+
+    return new File(
+      [blob],
+      `foto-${Date.now()}.jpg`,
+      {
+        type:'image/jpeg',
+        lastModified:Date.now()
+      }
+    );
+
+  }finally{
+
+    if(bitmap?.close){
+      bitmap.close();
+    }
+
+    if(objectUrl){
+      URL.revokeObjectURL(objectUrl);
+    }
+  }
+}
+
+async function uploadPartyPhoto(roundId,file){
+
+  const status=
+    el.socialPartyGuestList.querySelector(
+      `[data-party-photo-status="${roundId}"]`
+    );
+
+  if(!file || !status){
+    return;
+  }
+
+  const originalSize=file.size;
+
+  try{
+
+    const prepared=await preparePartyPhoto(
+      file,
+      status
+    );
+
+    status.textContent=
+      `⬆️ Subiendo fotografía · ${photoSizeLabel(prepared.size)}…`;
+
+    const path=
+      `${eventId}/${roundId}/` +
+      `${visitorToken}-${crypto.randomUUID()}.jpg`;
+
+    const {error:uploadError}=await db.storage
+      .from('party-photos')
+      .upload(
+        path,
+        prepared,
+        {
+          contentType:'image/jpeg',
+          upsert:false,
+          cacheControl:'3600'
+        }
+      );
+
+    if(uploadError){
+      throw new Error(
+        `No se pudo subir: ${uploadError.message}`
+      );
+    }
+
+    const {error:registerError}=await db.rpc(
+      'register_party_photo_v5301',
+      {
+        p_round_id:roundId,
+        p_visitor_id:visitorToken,
+        p_storage_path:path
+      }
+    );
+
+    if(registerError){
+
+      await db.storage
+        .from('party-photos')
+        .remove([path])
+        .catch(()=>{});
+
+      if(
+        registerError.message.includes('photo_limit')
+      ){
+        throw new Error(
+          'Máximo 3 fotos por ronda.'
+        );
+      }
+
+      throw registerError;
+    }
+
+    status.textContent=
+      `✅ Foto enviada · ` +
+      `${photoSizeLabel(originalSize)} → ` +
+      `${photoSizeLabel(prepared.size)}. ` +
+      `Esperando aprobación del DJ.`;
+
+    haptic('reaction');
+
+    toast(
+      '📸 Foto enviada',
+      'Será visible solo si el DJ la aprueba',
+      'success'
+    );
+
+  }catch(error){
+
+    const message=
+      error instanceof Error
+        ? error.message
+        : String(error);
+
+    status.textContent=
+      `❌ ${message}`;
+
+    toast(
+      'No se pudo enviar la foto',
+      message,
+      'error'
+    );
+  }
+}
 async function signedPartyPhoto(path){const {data,error}=await db.storage.from('party-photos').createSignedUrl(path,300);return error?null:data.signedUrl}
 async function loadPartyPhotos(){if(!db||!eventId)return;if(!session){return}const {data,error}=await db.rpc('get_party_photos_v5301',{p_event_id:eventId,p_moderation:true});if(error){console.warn('Fotos V5.30.1:',error.message);return}const all=data||[];partyPhotoState.pending=all.filter(x=>x.status==='pending');partyPhotoState.approved=all.filter(x=>x.status==='approved');el.partyPhotoModeration.hidden=!(socialState.rounds.some(x=>x.kind==='photo')||all.length);el.partyPhotoPendingCount.textContent=partyPhotoState.pending.length;const render=async(list,approved)=>{const rows=[];for(const x of list){const url=await signedPartyPhoto(x.storage_path);if(url)rows.push(`<article class="party-photo-item" data-photo-id="${x.id}"><img src="${url}" alt="Foto de invitado">${approved?'':`<div class="party-photo-actions"><button data-photo-moderate="approved" data-photo-id="${x.id}">✅</button><button data-photo-moderate="rejected" data-photo-id="${x.id}">❌</button></div>`}${approved?`<div class="party-photo-actions"><button data-project-photo="${x.id}">🎬 Proyectar</button><button data-clear-photo="1">⏹ Quitar</button><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`:`<div class="party-photo-delete-row"><button class="danger" data-delete-photo="${x.id}">🗑️ Eliminar</button></div>`}</article>`)}return rows.join('')};el.partyPhotoQueue.innerHTML=await render(partyPhotoState.pending,false)||'<div class="summary-empty">Sin fotos pendientes.</div>';el.partyPhotoApproved.innerHTML=await render(partyPhotoState.approved,true)||'<div class="summary-empty">Sin fotos aprobadas.</div>';await loadPartyPhotoStats()}
 async function moderatePartyPhoto(id,status){const {error}=await db.rpc('moderate_party_photo_v5301',{p_photo_id:id,p_status:status});if(error){toast('No se pudo moderar',error.message,'error');return}toast(status==='approved'?'✅ Foto aprobada':'❌ Foto rechazada','',status==='approved'?'success':'info');await loadPartyPhotos()}
