@@ -395,12 +395,97 @@ async function syncProjectedKaraoke(){
 }
 
 // MUSIC_DEDICATION_V545
+  // DEDICATION_SCREEN_SYNC_V5451
+  let dedicationScreenSyncTimer=null;
+  let dedicationScreenFeaturedId=undefined;
+
+  function isPartyScreenPage(){
+    const params=new URLSearchParams(location.search);
+
+    return (
+      params.get('modo')==='pantalla' ||
+      params.get('pantalla')==='1' ||
+      document.body.classList.contains('screen-mode')
+    );
+  }
+
+  async function syncDedicationPartyScreen(){
+
+    if(
+      !isPartyScreenPage() ||
+      !eventId ||
+      document.hidden
+    ){
+      return;
+    }
+
+    const {data,error}=await db
+      .from('events')
+      .select('featured_request_id')
+      .eq('id',eventId)
+      .maybeSingle();
+
+    if(error || !data){
+      return;
+    }
+
+    const currentId=
+      data.featured_request_id || null;
+
+    if(
+      dedicationScreenFeaturedId === undefined
+    ){
+      dedicationScreenFeaturedId=currentId;
+      return;
+    }
+
+    if(
+      currentId !==
+      dedicationScreenFeaturedId
+    ){
+      dedicationScreenFeaturedId=currentId;
+
+      /*
+       * Recargar Pantalla Fiesta cuando:
+       * - se proyecta una dedicatoria;
+       * - se quita;
+       * - se marca como dedicada;
+       * - se elimina.
+       *
+       * La recarga reconstruye correctamente
+       * la escena o devuelve el carrusel.
+       */
+      location.reload();
+    }
+  }
+
+  function startDedicationPartyScreenSync(){
+
+    if(
+      dedicationScreenSyncTimer ||
+      !isPartyScreenPage()
+    ){
+      return;
+    }
+
+    dedicationScreenSyncTimer=setInterval(
+      syncDedicationPartyScreen,
+      2000
+    );
+
+    syncDedicationPartyScreen();
+  }
+
+
   let dedicationState={items:[],selected:null,manual:false,searchTimer:null,searchSeq:0,inFlight:false};
   function dedicationStatusLabel(s){return({pending:'Pendiente',approved:'Aprobada',queued:'En cola',projected:'Proyectada',dedicated:'Ya dedicada',rejected:'Rechazada'})[s]||s}
   function scheduleDedicationSearch(){clearTimeout(dedicationState.searchTimer);const q=el.dedicationMusicSearch.value.trim();el.clearDedicationMusicSearch.hidden=!q;if(q.length<3){el.dedicationMusicResults.hidden=true;el.dedicationMusicSearchStatus.textContent=q?'Escribe al menos 3 caracteres.':'';return}el.dedicationMusicSearchStatus.textContent='Buscando canciones…';dedicationState.searchTimer=setTimeout(()=>searchDedicationMusic(q),280)}
   function searchDedicationMusic(query){const seq=++dedicationState.searchSeq,cb=`dedicationItunes_${Date.now()}_${seq}`,script=document.createElement('script'),timeout=setTimeout(()=>finish('La búsqueda tardó demasiado.'),8000);function clean(){clearTimeout(timeout);delete window[cb];script.remove()}function finish(error,data){if(seq!==dedicationState.searchSeq){clean();return}clean();if(error){el.dedicationMusicSearchStatus.textContent=error;el.dedicationMusicResults.hidden=true;return}renderDedicationResults(data.results||[])}window[cb]=d=>finish(null,d);script.onerror=()=>finish('No fue posible consultar el catálogo.');script.src=`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&country=CL&media=music&entity=song&limit=8&callback=${encodeURIComponent(cb)}`;document.body.appendChild(script)}
   function renderDedicationResults(items){const out=[],seen=new Set();for(const x of items){const k=`${x.trackName}|${x.artistName}`.toLowerCase();if(!seen.has(k)){seen.add(k);out.push(x)}}el.dedicationMusicSearchStatus.textContent=out.length?'Selecciona la canción correcta:':'No encontramos resultados.';el.dedicationMusicResults.hidden=!out.length;el.dedicationMusicResults.innerHTML=out.slice(0,6).map((x,i)=>`<button type="button" class="music-result" data-dedication-result="${i}"><img class="music-cover" src="${esc((x.artworkUrl100||'').replace('100x100','200x200'))}" alt=""><span class="music-copy"><b>${esc(x.trackName)}</b><span>${esc(x.artistName)}</span></span><span class="music-add">＋</span></button>`).join('');el.dedicationMusicResults.querySelectorAll('[data-dedication-result]').forEach((b,i)=>b.onclick=()=>selectDedicationMusic(out[i]))}
-  function selectDedicationMusic(x){dedicationState.selected={title:x.trackName,artist:x.artistName,artwork_url:(x.artworkUrl100||'').replace('100x100','300x300'),external_track_id:String(x.trackId||''),external_url:x.trackViewUrl||''};dedicationState.manual=false;el.dedicationManualFields.hidden=true;el.dedicationMusicResults.hidden=true;el.dedicationSelectedMusic.hidden=false;el.dedicationSelectedMusic.innerHTML=`<img class="music-cover" src="${esc(dedicationState.selected.artwork_url)}" alt=""><span class="music-copy"><b>${esc(x.trackName)}</b><span>${esc(x.artistName)}</span></span><button type="button">×</button>`;el.dedicationSelectedMusic.querySelector('button').onclick=clearDedicationMusic;el.dedicationMusicSearch.value='';el.clearDedicationMusicSearch.hidden=true;el.dedicationMusicSearchStatus.textContent='Canción seleccionada ✓'}
+  function selectDedicationMusic(x){dedicationState.selected={title:x.trackName,artist:x.artistName,artwork_url:(x.artworkUrl100||'').replace('100x100','300x300'),external_track_id:String(x.trackId||''),external_url:x.trackViewUrl||''};dedicationState.manual=false;el.dedicationManualFields.hidden=true;el.dedicationMusicResults.hidden=true;
+el.dedicationMusicResults.innerHTML='';
+el.dedicationMusicSearch.blur();
+el.dedicationSelectedMusic.hidden=false;el.dedicationSelectedMusic.innerHTML=`<img class="music-cover" src="${esc(dedicationState.selected.artwork_url)}" alt=""><span class="music-copy"><b>${esc(x.trackName)}</b><span>${esc(x.artistName)}</span></span><button type="button">×</button>`;el.dedicationSelectedMusic.querySelector('button').onclick=clearDedicationMusic;el.dedicationMusicSearch.value='';el.clearDedicationMusicSearch.hidden=true;el.dedicationMusicSearchStatus.textContent='Canción seleccionada ✓'}
   function clearDedicationMusic(){dedicationState.selected=null;el.dedicationSelectedMusic.hidden=true;el.dedicationMusicSearchStatus.textContent=''}
   function toggleDedicationManual(){dedicationState.manual=!dedicationState.manual;if(dedicationState.manual)clearDedicationMusic();el.dedicationManualFields.hidden=!dedicationState.manual;el.dedicationManualToggle.textContent=dedicationState.manual?'🔎 Volver al buscador':'✍️ No encuentro la canción'}
   async function submitMusicDedication(){if(dedicationState.inFlight)return;const recipient=el.dedicationRecipient.value.trim(),message=el.dedicationText.value.trim(),title=dedicationState.selected?.title||el.dedicationSongTitle.value.trim(),artist=dedicationState.selected?.artist||el.dedicationSongArtist.value.trim();if(!recipient||!message||!title){el.musicDedicationGuestNotice.textContent='Completa destinatario, canción y mensaje.';return}dedicationState.inFlight=true;el.submitMusicDedication.disabled=true;const {error}=await db.rpc('submit_music_dedication_v545',{p_event_id:eventId,p_visitor_id:visitorToken,p_recipient:recipient,p_sender_name:el.dedicationSender.value.trim()||null,p_message:message,p_song_title:title,p_song_artist:artist||null,p_artwork_url:dedicationState.selected?.artwork_url||null,p_external_track_id:dedicationState.selected?.external_track_id||null,p_external_url:dedicationState.selected?.external_url||null});dedicationState.inFlight=false;el.submitMusicDedication.disabled=false;if(error){el.musicDedicationGuestNotice.textContent=error.message.includes('pending_dedication')?'Ya tienes una dedicatoria esperando aprobación.':error.message.includes('dedication_limit')?'Alcanzaste el máximo de 5 dedicatorias.':error.message;return}el.musicDedicationGuestNotice.textContent='✅ Dedicatoria enviada. Esperando aprobación del DJ.';el.dedicationRecipient.value=el.dedicationText.value=el.dedicationSender.value=el.dedicationSongTitle.value=el.dedicationSongArtist.value='';clearDedicationMusic();toast('💞 Dedicatoria enviada','El DJ la revisará','success');await loadMusicDedications()}
@@ -597,7 +682,9 @@ async function saveDjAd(){const {error}=await db.rpc('save_dj_public_profile_v53
 async function loadDjAd(){if(!db||!eventId)return;const {data}=await db.rpc('get_dj_public_profile_v536',{p_event_id:eventId});djAdState=data||null}
 function renderScreenDjAd(){const p=djAdState;if(!p||!el.screenDjAd)return false;el.screenDjAdHeadline.textContent=p.headline||'¿Necesitas DJ para tu evento?';el.screenDjAdName.textContent=p.display_name||'Luis DJ';el.screenDjAdMessage.textContent=p.message||'Hagamos bailar a todos 🔥';const dest=djAdDestination(p);el.screenDjAdQr.innerHTML='';if(dest)renderQr(el.screenDjAdQr,dest,260);el.screenDjAdContact.textContent=p.whatsapp?`📱 ${p.whatsapp}`:p.instagram?`📸 ${p.instagram}`:p.email?`✉️ ${p.email}`:'';el.screenDjAdCta.textContent=p.cta_text||'Cotiza tu evento';return true}
 function showScreenDjAd(){if(!screenModeActive||!djAdState?.is_ad_enabled||projectionActive())return false;if(!renderScreenDjAd())return false;el.screenDjAd.hidden=false;clearInterval(partyScreen.timer);partyScreen.timer=null;setTimeout(()=>{el.screenDjAd.hidden=true;if(screenModeActive&&partyScreen.auto&&!projectionActive()){partyAdvance(1)}},12000);return true}
-async function load(){if(!db){setNotice('Falta configurar Supabase.',true);return}const slug=requestedEventSlug();if(!slug){await showPublicEventLanding();return}const {data:e,error}=await db.from('events').select('id,name,slug,event_date,is_active,featured_request_id,owner_id,display_name,theme_key,color_primary,color_secondary,color_accent,layout_mode').eq('slug',slug).maybeSingle();if(error||!e){setNotice('Evento no disponible.',true);return}if(!e.is_active){const {data:s}=await db.auth.getSession();if(!s.session||s.session.user.id!==e.owner_id){setNotice('Este evento está pausado.',true);return}}currentEvent=e;eventId=e.id;projectorState.featured_request_id=e.featured_request_id||null;await loadDjAd();applyEventTheme(e);renderGuestIdentity();await registerEventVisit();await refreshRows();if(!session&&Notification.permission==='granted')pushHealthCheck(true);await loadMyActivity();await loadGuestGame();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:live`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},handleRealtime).on('postgres_changes',{event:'UPDATE',schema:'public',table:'events',filter:`id=eq.${eventId}`},handleEventRealtime).on('postgres_changes',{event:'INSERT',schema:'public',table:'event_announcements'},()=>loadAnnouncements()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_rounds'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_entries'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'music_dedications'},()=>loadMusicDedications()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'karaoke_entries'},payload=>{loadKaraokeState();if(payload.new?.status==='called'&&!payload.new?.acknowledged_at)showKaraokeCallAlert(payload.new)}).on('postgres_changes',{event:'*',schema:'public',table:'karaoke_ratings'},()=>loadKaraokeState()).subscribe(status=>{if(status==='SUBSCRIBED')setConnection(true,'Conectado en vivo');if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status))setConnection(false,'Reconectando…')});if(session)await loadOwnedEvents();renderEventManager();await loadVisitorAnalytics();await loadSmartRanking();await loadGameLeaderboard();await loadPartyFinalState();await syncProjectedPhoto();await syncProjectedGreeting();await syncProjectedKaraoke();await loadKaraokeState();await loadMusicDedications();renderNotificationCenter()}
+async function load(){if(!db){setNotice('Falta configurar Supabase.',true);return}const slug=requestedEventSlug();if(!slug){await showPublicEventLanding();return}const {data:e,error}=await db.from('events').select('id,name,slug,event_date,is_active,featured_request_id,owner_id,display_name,theme_key,color_primary,color_secondary,color_accent,layout_mode').eq('slug',slug).maybeSingle();if(error||!e){setNotice('Evento no disponible.',true);return}if(!e.is_active){const {data:s}=await db.auth.getSession();if(!s.session||s.session.user.id!==e.owner_id){setNotice('Este evento está pausado.',true);return}}currentEvent=e;
+eventId=e.id;
+startDedicationPartyScreenSync();projectorState.featured_request_id=e.featured_request_id||null;await loadDjAd();applyEventTheme(e);renderGuestIdentity();await registerEventVisit();await refreshRows();if(!session&&Notification.permission==='granted')pushHealthCheck(true);await loadMyActivity();await loadGuestGame();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:live`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},handleRealtime).on('postgres_changes',{event:'UPDATE',schema:'public',table:'events',filter:`id=eq.${eventId}`},handleEventRealtime).on('postgres_changes',{event:'INSERT',schema:'public',table:'event_announcements'},()=>loadAnnouncements()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_rounds'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_entries'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'music_dedications'},()=>loadMusicDedications()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'karaoke_entries'},payload=>{loadKaraokeState();if(payload.new?.status==='called'&&!payload.new?.acknowledged_at)showKaraokeCallAlert(payload.new)}).on('postgres_changes',{event:'*',schema:'public',table:'karaoke_ratings'},()=>loadKaraokeState()).subscribe(status=>{if(status==='SUBSCRIBED')setConnection(true,'Conectado en vivo');if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status))setConnection(false,'Reconectando…')});if(session)await loadOwnedEvents();renderEventManager();await loadVisitorAnalytics();await loadSmartRanking();await loadGameLeaderboard();await loadPartyFinalState();await syncProjectedPhoto();await syncProjectedGreeting();await syncProjectedKaraoke();await loadKaraokeState();await loadMusicDedications();renderNotificationCenter()}
 const EVENT_CLEANUP_MODULES=[['requests','🎵','Peticiones'],['votes','❤️','Votos'],['reactions','🔥','Reacciones'],['photos','📸','Fotografías'],['greetings','💌','Saludos'],['dedications','💞','Dedicatorias'],['karaoke','🎤','Karaoke'],['games','🎮','Party Games'],['announcements','📣','Avisos'],['push','📲','Push subscriptions'],['analytics','👥','Analytics'],['star','👑','Momento Estrella'],['thermometer','🔥','Termómetro de la Fiesta']];
 function formatCleanupBytes(n){const x=Number(n)||0;return x<1024?`${x} B`:x<1048576?`${(x/1024).toFixed(1)} KB`:`${(x/1048576).toFixed(1)} MB`}
 async function invokeEventCleanup(action){const {data:s,error:se}=await db.auth.getSession(),token=s?.session?.access_token;if(se||!token)throw new Error('Sesión DJ no disponible');const {data,error}=await db.functions.invoke('manage-event-data',{headers:{Authorization:`Bearer ${token}`},body:{event_id:eventId,action}});if(error||!data?.ok)throw new Error(data?.error||error?.message||'Error gestionando datos');return data}
