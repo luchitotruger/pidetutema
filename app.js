@@ -1228,7 +1228,7 @@ function renderScreenDjAd(){const p=djAdState;if(!p||!el.screenDjAd)return false
 function showScreenDjAd(){if(!screenModeActive||!djAdState?.is_ad_enabled||projectionActive())return false;if(!renderScreenDjAd())return false;el.screenDjAd.hidden=false;clearInterval(partyScreen.timer);partyScreen.timer=null;setTimeout(()=>{el.screenDjAd.hidden=true;if(screenModeActive&&partyScreen.auto&&!projectionActive()){partyAdvance(1)}},12000);return true}
 async function load(){if(!db){setNotice('Falta configurar Supabase.',true);return}const slug=requestedEventSlug();if(!slug){await showPublicEventLanding();return}const {data:e,error}=await db.from('events').select('id,name,slug,event_date,is_active,featured_request_id,owner_id,display_name,theme_key,color_primary,color_secondary,color_accent,layout_mode').eq('slug',slug).maybeSingle();if(error||!e){setNotice('Evento no disponible.',true);return}if(!e.is_active){const {data:s}=await db.auth.getSession();if(!s.session||s.session.user.id!==e.owner_id){setNotice('Este evento está pausado.',true);return}}currentEvent=e;
 eventId=e.id;
-startDedicationPartyScreenSync();projectorState.featured_request_id=e.featured_request_id||null;await loadDjAd();applyEventTheme(e);renderGuestIdentity();await registerEventVisit();await refreshRows();if(!session&&Notification.permission==='granted')pushHealthCheck(true);await loadMyActivity();await loadGuestGame();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:live`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},handleRealtime).on('postgres_changes',{event:'UPDATE',schema:'public',table:'events',filter:`id=eq.${eventId}`},handleEventRealtime).on('postgres_changes',{event:'INSERT',schema:'public',table:'event_announcements'},()=>loadAnnouncements()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_rounds'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_entries'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'music_dedications'},()=>loadMusicDedications()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'karaoke_entries'},payload=>{loadKaraokeState();if(payload.new?.status==='called'&&!payload.new?.acknowledged_at)showKaraokeCallAlert(payload.new)}).on('postgres_changes',{event:'*',schema:'public',table:'karaoke_ratings'},()=>loadKaraokeState()).subscribe(status=>{if(status==='SUBSCRIBED')setConnection(true,'Conectado en vivo');if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status))setConnection(false,'Reconectando…')});if(session)await loadOwnedEvents();renderEventManager();await loadVisitorAnalytics();await loadSmartRanking();await loadGameLeaderboard();await loadPartyFinalState();await syncProjectedPhoto();await syncProjectedGreeting();await syncProjectedKaraoke();await loadKaraokeState();await loadMusicDedications();renderNotificationCenter()}
+startDedicationPartyScreenSync();projectorState.featured_request_id=e.featured_request_id||null;await loadDjAd();applyEventTheme(e);renderGuestIdentity();await registerEventVisit();await refreshRows();if(!session&&Notification.permission==='granted')pushHealthCheck(true);await loadMyActivity();await loadGuestGame();if(channel)await db.removeChannel(channel);channel=db.channel(`event:${eventId}:live`).on('postgres_changes',{event:'*',schema:'public',table:'song_requests',filter:`event_id=eq.${eventId}`},handleRealtime).on('postgres_changes',{event:'UPDATE',schema:'public',table:'events',filter:`id=eq.${eventId}`},handleEventRealtime).on('postgres_changes',{event:'INSERT',schema:'public',table:'event_announcements'},()=>loadAnnouncements()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_rounds'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'party_social_entries'},()=>loadSocialExperience()).on('postgres_changes',{event:'*',schema:'public',table:'music_dedications'},()=>loadMusicDedications()).on('postgres_changes',{event:'UPDATE',schema:'public',table:'karaoke_entries'},payload=>{loadKaraokeState();if(payload.new?.status==='called'&&!payload.new?.acknowledged_at)showKaraokeCallAlert(payload.new)}).on('postgres_changes',{event:'*',schema:'public',table:'karaoke_ratings'},()=>loadKaraokeState()).subscribe(status=>{if(status==='SUBSCRIBED')setConnection(true,'Conectado en vivo');if(['CHANNEL_ERROR','TIMED_OUT','CLOSED'].includes(status))setConnection(false,'Reconectando…')});startCoreRealtimeFallback();if(session)await loadOwnedEvents();renderEventManager();await loadVisitorAnalytics();await loadSmartRanking();await loadGameLeaderboard();await loadPartyFinalState();await syncProjectedPhoto();await syncProjectedGreeting();await syncProjectedKaraoke();await loadKaraokeState();await loadMusicDedications();renderNotificationCenter()}
 const EVENT_CLEANUP_MODULES=[['requests','🎵','Peticiones'],['votes','❤️','Votos'],['reactions','🔥','Reacciones'],['photos','📸','Fotografías'],['greetings','💌','Saludos'],['dedications','💞','Dedicatorias'],['karaoke','🎤','Karaoke'],['games','🎮','Party Games'],['announcements','📣','Avisos'],['push','📲','Push subscriptions'],['analytics','👥','Analytics'],['star','👑','Momento Estrella'],['thermometer','🔥','Termómetro de la Fiesta']];
 function formatCleanupBytes(n){const x=Number(n)||0;return x<1024?`${x} B`:x<1048576?`${(x/1024).toFixed(1)} KB`:`${(x/1048576).toFixed(1)} MB`}
 async function invokeEventCleanup(action){const {data:s,error:se}=await db.auth.getSession(),token=s?.session?.access_token;if(se||!token)throw new Error('Sesión DJ no disponible');const {data,error}=await db.functions.invoke('manage-event-data',{headers:{Authorization:`Bearer ${token}`},body:{event_id:eventId,action}});if(error||!data?.ok)throw new Error(data?.error||error?.message||'Error gestionando datos');return data}
@@ -1247,6 +1247,187 @@ function mySongAlertKey(id,status){return `pide_tu_tema_song_alert:${currentEven
 function wasSongAlerted(id,status){return localStorage.getItem(mySongAlertKey(id,status))==='1'}
 function markSongAlerted(id,status){localStorage.setItem(mySongAlertKey(id,status),'1')}
 function notifyMySongStatus(song){if(!song||!isMySong(song.id)||!['next','playing'].includes(song.status)||wasSongAlerted(song.id,song.status))return;markSongAlerted(song.id,song.status);if(song.status==='next'){addPartyNotification('next','Tu canción viene pronto',`${song.title}${song.artist?' · '+song.artist:''}`);haptic('next');beep();toast('🔥 ¡Prepárate!',`Tu canción viene pronto: ${song.title}${song.artist?' · '+song.artist:''}`,'song-alert');browserNotify('🔥 ¡Tu canción viene pronto!',`${song.title}${song.artist?' · '+song.artist:''} · ¡A la pista!`)}else{addPartyNotification('playing','Está sonando tu canción',`${song.title}${song.artist?' · '+song.artist:''}`);haptic('playing');beep();setTimeout(beep,180);toast('🔊 ¡Está sonando tu canción!',`${song.title}${song.artist?' · '+song.artist:''} · ¡A bailar!`,'song-playing');browserNotify('🔊 ¡Está sonando tu canción!',`${song.title}${song.artist?' · '+song.artist:''} · ¡A bailar!`)}}
+// CORE_REALTIME_FALLBACK_V5464
+let coreRealtimeFallbackTimer=null;
+let coreRealtimeFallbackBusy=false;
+let coreRealtimeRowsSignature='';
+let coreRealtimeSocialSignature='';
+
+function coreRowsSignature(list){
+  return (list||[])
+    .map(x=>[
+      x.id,
+      x.status,
+      Number(x.votes)||0,
+      x.title,
+      x.artist||''
+    ].join(':'))
+    .join('|');
+}
+
+function coreSocialSignature(data){
+  return JSON.stringify({
+    rounds:(data?.rounds||[]).map(x=>[
+      x.id,
+      x.kind,
+      x.title,
+      x.created_at
+    ]),
+    stats:data?.stats||[]
+  });
+}
+
+async function syncCoreRealtimeFallback(force=false){
+
+  if(
+    !db ||
+    !eventId ||
+    document.hidden ||
+    coreRealtimeFallbackBusy
+  ){
+    return;
+  }
+
+  coreRealtimeFallbackBusy=true;
+
+  try{
+
+    /*
+     * Actualización liviana de canciones.
+     * Evitamos refreshRows(), porque además carga
+     * Analytics, avisos, reacciones y otros módulos.
+     */
+    const {
+      data:songData,
+      error:songError
+    }=await db
+      .from('song_requests')
+      .select(
+        'id,title,artist,requester_name,message,' +
+        'votes,status,created_at,artwork_url,' +
+        'external_track_id,source,external_url'
+      )
+      .eq('event_id',eventId)
+      .neq('status','rejected')
+      .order('votes',{ascending:false})
+      .order('created_at',{ascending:true});
+
+    if(!songError){
+
+      const nextRows=songData||[];
+      const signature=coreRowsSignature(nextRows);
+
+      if(
+        force ||
+        signature!==coreRealtimeRowsSignature
+      ){
+        coreRealtimeRowsSignature=signature;
+        rows=nextRows;
+        initialized=true;
+
+        render();
+        updateMobileMiniPlayer();
+        updateContextualSheet();
+
+        /*
+         * Actualiza:
+         * 🔊 Sonando ahora
+         * Top 3
+         * Carrusel de Pantalla Fiesta
+         */
+        if(screenModeActive){
+          renderScreenMode();
+          renderPartyScene();
+        }
+      }
+    }else{
+      console.warn(
+        'V5.46.4 respaldo canciones:',
+        songError.message
+      );
+    }
+
+    /*
+     * Actualización de Lo que pide la fiesta.
+     */
+    const {
+      data:socialData,
+      error:socialError
+    }=await db.rpc(
+      'get_social_experience_v530',
+      {
+        p_event_id:eventId,
+        p_visitor_id:visitorToken
+      }
+    );
+
+    if(!socialError){
+
+      const nextSocial=
+        socialData||{
+          rounds:[],
+          stats:[]
+        };
+
+      const signature=
+        coreSocialSignature(nextSocial);
+
+      if(
+        force ||
+        signature!==coreRealtimeSocialSignature
+      ){
+        coreRealtimeSocialSignature=signature;
+        socialState=nextSocial;
+
+        renderSocialGuest();
+        renderSocialAdmin();
+        refreshMyPartyHub();
+
+        if(session){
+          await loadPartyPhotos();
+          await loadPartyGreetings();
+        }
+      }
+
+    }else{
+      console.warn(
+        'V5.46.4 respaldo experiencia social:',
+        socialError.message
+      );
+    }
+
+  }finally{
+    coreRealtimeFallbackBusy=false;
+  }
+}
+
+function startCoreRealtimeFallback(){
+
+  if(coreRealtimeFallbackTimer){
+    return;
+  }
+
+  syncCoreRealtimeFallback(true);
+
+  coreRealtimeFallbackTimer=setInterval(()=>{
+
+    if(!document.hidden){
+      syncCoreRealtimeFallback();
+    }
+
+  },5000);
+}
+
+function stopCoreRealtimeFallback(){
+
+  if(coreRealtimeFallbackTimer){
+    clearInterval(coreRealtimeFallbackTimer);
+  }
+
+  coreRealtimeFallbackTimer=null;
+  coreRealtimeFallbackBusy=false;
+}
+
 async function handleRealtime(payload){if(payload.eventType==='INSERT'&&initialized){const x=payload.new;beep();toast('🎵 Nueva canción',`${x.title}${x.artist?' · '+x.artist:''}`,'success');browserNotify('Nueva canción solicitada',`${x.title}${x.requester_name?' · '+x.requester_name:''}`);if(session&&el.dj.hidden){unseen++;updateBadge()}}if(payload.eventType==='UPDATE'&&payload.new.status==='playing'&&payload.old.status!=='playing'){partyShowNow();toast('🔊 Ahora suena',`${payload.new.title}${payload.new.artist?' · '+payload.new.artist:''}`,'success')}if(payload.eventType==='UPDATE'&&payload.old.status!==payload.new.status)notifyMySongStatus(payload.new);await refreshRows();await loadMyActivity();await loadGuestGame();await loadSmartRanking();await loadGameLeaderboard()}
 async function refreshRows(){if(!db||!eventId)return;const {data,error}=await db.from('song_requests').select('id,title,artist,requester_name,message,votes,status,created_at,artwork_url,external_track_id,source,external_url').eq('event_id',eventId).neq('status','rejected').order('votes',{ascending:false}).order('created_at',{ascending:true});if(error){setNotice('No se pudieron cargar los pedidos.',true);setConnection(false,'Sin conexión');return}rows=data||[];initialized=true;render();renderQuickMusicStart();updateMobileMiniPlayer();updateContextualSheet();await loadLiveExperience();await loadReactions();await loadAnnouncements();await loadSocialExperience()}
 function handleEventRealtime(payload){syncProjectedPhoto();syncProjectedGreeting();syncProjectedKaraoke();projectorState.featured_request_id=payload.new.featured_request_id||null;syncDedicationControl();renderScreenMode()}
@@ -1270,8 +1451,11 @@ document.addEventListener('visibilitychange',()=>{
   if(document.hidden){
     stopKaraokeProjectionPolling();
     stopPhotoScreenPolling();
+    stopCoreRealtimeFallback();
   }else{
     syncProjectedPhoto(true);
+    startCoreRealtimeFallback();
+    syncCoreRealtimeFallback(true);
     syncProjectedGreeting();
     syncProjectedKaraoke();
     startKaraokeProjectionPolling();
