@@ -14,7 +14,28 @@
  function event(){return bridge().getEventId?.()||null}
  function visitor(){return bridge().getVisitorToken?.()||null}
  function guest(){try{return bridge().getGuestNickname?.()||''}catch{return''}}
- async function mediaManager(body){if(!v548db)throw new Error('Supabase V5.48 no está disponible.');const {data,error}=await v548db.functions.invoke('manage-party-media',{body});if(error)throw new Error(error.message||'No se pudo comunicar con el servidor multimedia.');if(!data?.ok)throw new Error(data?.error||'Error multimedia.');return data}
+ async function mediaManager(body){
+   if(!v548db)throw new Error('Supabase V5.48 no está disponible.');
+   const stage=body?.action||'desconocida';
+   const {data,error}=await v548db.functions.invoke('manage-party-media',{body});
+   if(error){
+     let detail='';
+     try{
+       if(error.context instanceof Response){
+         const raw=await error.context.clone().text();
+         try{detail=JSON.parse(raw)?.error||raw}catch{detail=raw}
+       }else if(error.context?.json){
+         const payload=await error.context.json();
+         detail=payload?.error||JSON.stringify(payload)
+       }
+     }catch{}
+     const eventOk=event()?'OK':'NO';
+     const visitorOk=visitor()?'OK':'NO';
+     throw new Error(`Etapa: ${stage} | Evento: ${eventOk} | Visitante: ${visitorOk} | Servidor: ${detail||error.message||'Error desconocido'}`);
+   }
+   if(!data?.ok)throw new Error(`Etapa: ${stage} | Servidor: ${data?.error||'Error multimedia'}`);
+   return data;
+ }
  async function uploadMedia(kind,file,duration){const eventId=event(),visitorId=visitor();if(!eventId)throw new Error('El evento todavía no está disponible.');if(!visitorId)throw new Error('No se pudo identificar este dispositivo.');const prepared=await mediaManager({action:'prepare_upload',kind,event_id:eventId,visitor_id:visitorId,display_name:guest(),mime_type:file.type,size_bytes:file.size,file_name:file.name});const {error:uploadError}=await v548db.storage.from(prepared.bucket).uploadToSignedUrl(prepared.path,prepared.token,file,{contentType:file.type});if(uploadError)throw new Error(uploadError.message||'No se pudo subir el archivo multimedia.');return await mediaManager({action:'finalize_upload',kind,event_id:eventId,visitor_id:visitorId,display_name:guest(),storage_path:prepared.path,mime_type:file.type,size_bytes:file.size,duration_seconds:duration})}
  async function recordVoice(){if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)return alert('Este navegador no permite grabar audio.');const stream=await navigator.mediaDevices.getUserMedia({audio:true});state.voiceChunks=[];const rec=new MediaRecorder(stream);state.voice=rec;rec.ondataavailable=e=>{if(e.data.size)state.voiceChunks.push(e.data)};rec.onstop=()=>{stream.getTracks().forEach(t=>t.stop());const blob=new Blob(state.voiceChunks,{type:rec.mimeType||'audio/webm'});const a=$('v548VoicePreview');a.src=URL.createObjectURL(blob);a.hidden=false;a._blob=blob;$('v548VoiceSend').disabled=false};rec.start();$('v548VoiceRecord').textContent='⏹ Detener';let n=10;$('v548VoiceClock').textContent='10 s';state.voiceTimer=setInterval(()=>{$('v548VoiceClock').textContent=`${--n} s`;if(n<=0)stopVoice()},1000)}
  function stopVoice(){clearInterval(state.voiceTimer);if(state.voice?.state==='recording')state.voice.stop();$('v548VoiceRecord').textContent='🎙️ Grabar 10 s'}
