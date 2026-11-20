@@ -1,4 +1,3 @@
-cat > supabase/functions/manage-party-media/index.ts <<'EOF'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const cors = {
@@ -73,7 +72,7 @@ Deno.serve(async req => {
 
     const { data: event, error: eventError } = await sb
       .from('events')
-      .select('id,user_id,is_active')
+      .select('id,owner_id,is_active')
       .eq('id', event_id)
       .single()
 
@@ -363,7 +362,7 @@ Deno.serve(async req => {
       throw new Error('No autorizado')
     }
 
-    if (event.user_id !== user.id) {
+    if (event.owner_id !== user.id) {
       throw new Error('Evento no autorizado')
     }
 
@@ -499,4 +498,3 @@ Deno.serve(async req => {
     )
   }
 })
-EOF
