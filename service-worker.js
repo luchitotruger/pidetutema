@@ -1,6 +1,6 @@
-const VERSION='5.46.0';
+const VERSION='5.47.1';
 const CACHE=`pide-tu-tema-v${VERSION}-shell-1`;
-const SHELL=['/','/index.html','/styles.css?v=5.46.0','/app.js?v=5.46.0','/party-games-v542.js?v=5.42','/manifest.webmanifest','/party-greetings-v546.js?v=5.46.0'];
+const SHELL=['/','/index.html','/styles.css?v=5.47.1','/app.js?v=5.47.1','/party-games-v542.js?v=5.42','/manifest.webmanifest','/party-greetings-v546.js?v=5.46.0','/pantalla-fiesta-ux-v2-safe.css?v=5.47.1'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL))));
 self.addEventListener('activate',event=>event.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('pide-tu-tema-')&&k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});

@@ -1,0 +1,49 @@
+/* PIDE TU TEMA - Pantalla Fiesta UX V2 segura - V5.47.1
+   Solo presentación: no observers, timers, polling, Realtime ni lógica JS. */
+#screenMode{
+  --ux-bg:#07030f;--ux-panel:rgba(24,14,43,.78);--ux-line:rgba(255,255,255,.12);
+  --ux-text:#fff;--ux-muted:#c9bddb;--ux-violet:#8b5cf6;--ux-pink:#ec4899;--ux-cyan:#22d3ee;
+}
+#screenMode:not([hidden]){
+  background:
+    radial-gradient(circle at 12% 8%,rgba(139,92,246,.28),transparent 30%),
+    radial-gradient(circle at 88% 15%,rgba(34,211,238,.18),transparent 27%),
+    linear-gradient(145deg,#05020b,#0b0615 58%,#07030f);
+  color:var(--ux-text);padding:clamp(16px,2vw,34px);overflow:hidden;
+}
+#screenMode .screen-header{align-items:center;padding-bottom:clamp(10px,1.3vw,20px);border-bottom:1px solid var(--ux-line)}
+#screenMode .screen-header h1{font-size:clamp(2rem,4vw,4.2rem);line-height:1;text-shadow:0 12px 38px rgba(0,0,0,.38)}
+#screenMode .screen-live{padding:7px 12px;border:1px solid rgba(52,211,153,.28);border-radius:999px;background:rgba(52,211,153,.09)}
+#screenMode .screen-actions{opacity:.35;transition:opacity .2s ease}#screenMode .screen-actions:hover{opacity:1}
+#screenMode .party-screen-stage{min-height:0;padding:clamp(14px,2vw,28px) 0}
+#screenMode #screenScene{height:100%;min-height:0;display:grid;place-items:center;animation:uxSafeScene .45s ease-out}
+#screenMode .party-scene-inner{width:min(1500px,100%);height:100%;display:grid;align-items:center}
+#screenMode .party-now,#screenMode .party-scene-now,#screenMode .party-now-playing{
+  border:1px solid var(--ux-line);border-radius:clamp(24px,3vw,44px);
+  background:linear-gradient(145deg,rgba(255,255,255,.085),rgba(255,255,255,.025));
+  box-shadow:0 32px 90px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px)
+}
+#screenMode .party-kicker,#screenMode .screen-now-label,#screenMode .screen-section-label{letter-spacing:.16em;color:var(--event-accent,var(--ux-cyan));font-weight:900}
+#screenMode #screenScene h2{font-size:clamp(3rem,7.2vw,8.2rem);line-height:.94;letter-spacing:-.045em;text-wrap:balance;text-shadow:0 15px 44px rgba(0,0,0,.42)}
+#screenMode #screenScene p{font-size:clamp(1.2rem,2.35vw,2.6rem);color:var(--ux-muted)}
+#screenMode .party-stat,#screenMode .party-rank-row{
+  border:1px solid var(--ux-line);border-radius:22px;background:var(--ux-panel);
+  box-shadow:0 18px 48px rgba(0,0,0,.24)
+}
+#screenMode .party-stat b{font-size:clamp(2.2rem,4.8vw,5.2rem)}
+#screenMode .party-qr-code,#screenMode .screen-qr-mini>div{padding:12px;border-radius:22px;box-shadow:0 20px 55px rgba(0,0,0,.38),0 0 0 7px rgba(255,255,255,.05)}
+#screenMode .screen-footer{padding-top:14px;border-top:1px solid var(--ux-line);color:#b9abc9}
+/* Overlays existentes: solo mejora visual, sin cambiar display/hidden/z-index */
+#screenMode .screen-karaoke,#screenMode .screen-party-game,#screenMode .screen-social-live,
+#screenMode .screen-party-greeting,#screenMode .screen-party-photo,#screenMode .screen-dedication,#screenMode .screen-dj-ad{
+  padding:clamp(38px,6.5vw,105px);animation:uxSafeOverlay .4s ease-out
+}
+#screenMode .screen-karaoke h2,#screenMode .screen-party-game h2,#screenMode .screen-social-live h2,
+#screenMode .screen-party-greeting h2,#screenMode .screen-dedication h2,#screenMode .screen-dj-ad h2{
+  font-size:clamp(3rem,7.5vw,8.6rem);line-height:.95;text-wrap:balance
+}
+#screenMode .screen-party-photo img{object-fit:contain;background:#030107}
+@keyframes uxSafeScene{from{opacity:0;transform:translateY(12px)}}
+@keyframes uxSafeOverlay{from{opacity:0;transform:scale(1.025)}}
+@media(max-width:900px){#screenMode .screen-actions{opacity:.7}#screenMode #screenScene h2{font-size:clamp(2.5rem,8vw,5rem)}}
+@media(prefers-reduced-motion:reduce){#screenMode *{animation-duration:.01ms!important;animation-iteration-count:1!important}}
