@@ -59,3 +59,116 @@
 #screenMode .party-stat{padding:clamp(18px,2.4vw,34px);text-align:center}
 #screenMode .party-stat small{display:block;margin-top:8px;font-size:clamp(1rem,1.7vw,1.7rem);color:var(--ux-muted)}
 @media(max-width:900px){#screenMode .party-stats{grid-template-columns:repeat(2,1fr)}#screenMode .party-list-row{grid-template-columns:auto 1fr}#screenMode .party-list-value{grid-column:2}}
+
+/* V5.47.2.1 AJUSTE TIPOGRAFIA PROYECTOR */
+#screenMode #screenScene h2,
+#screenMode .party-title {
+  font-size: clamp(2.4rem, 5vw, 5.8rem);
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  max-width: 94%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#screenMode #screenScene p,
+#screenMode .party-subtitle {
+  font-size: clamp(1.15rem, 1.9vw, 2.1rem);
+  line-height: 1.25;
+}
+
+#screenMode .party-list-copy b {
+  font-size: clamp(1.35rem, 2.3vw, 2.6rem);
+  line-height: 1.08;
+}
+
+#screenMode .party-list-copy small {
+  font-size: clamp(0.95rem, 1.3vw, 1.4rem);
+}
+
+#screenMode .party-list-value {
+  font-size: clamp(1.1rem, 1.7vw, 1.9rem);
+}
+
+#screenMode .party-stat b {
+  font-size: clamp(2rem, 3.8vw, 4.2rem);
+}
+
+#screenMode .party-stat small {
+  font-size: clamp(0.95rem, 1.3vw, 1.4rem);
+}
+
+/* V5.47.2.1 ESCALA TIPOGRAFICA PROYECTOR */
+
+#screenMode #screenScene h2,
+#screenMode .party-title {
+  font-size: clamp(2.2rem, 4.2vw, 4.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  max-width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#screenMode .party-subtitle,
+#screenMode #screenScene p {
+  font-size: clamp(1.15rem, 1.7vw, 1.8rem);
+  line-height: 1.28;
+  max-width: 86%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#screenMode .party-kicker {
+  font-size: clamp(0.9rem, 1.25vw, 1.3rem);
+  letter-spacing: 0.14em;
+}
+
+#screenMode .party-list-copy b {
+  font-size: clamp(1.3rem, 2vw, 2.2rem);
+  line-height: 1.1;
+}
+
+#screenMode .party-list-copy small {
+  font-size: clamp(0.9rem, 1.15vw, 1.25rem);
+  line-height: 1.2;
+}
+
+#screenMode .party-list-value {
+  font-size: clamp(1.05rem, 1.5vw, 1.6rem);
+}
+
+#screenMode .party-stat b {
+  font-size: clamp(2rem, 3.2vw, 3.5rem);
+}
+
+#screenMode .party-stat small {
+  font-size: clamp(0.9rem, 1.15vw, 1.2rem);
+  line-height: 1.2;
+}
+
+/* Control especial para títulos muy largos */
+#screenMode .party-title {
+  overflow-wrap: break-word;
+  text-wrap: balance;
+}
+
+/* V5.47.2.1 ESCALA INTELIGENTE */
+#screenMode{--party-fine-scale:1;--party-title:4.35rem;--party-subtitle:1.7rem;--party-kicker:1.15rem;--party-list-title:2rem;--party-list-meta:1.15rem;--party-list-value:1.45rem;--party-stat:3.2rem;--party-stat-label:1.1rem}
+#screenMode[data-scale="1080"]{--party-title:4.35rem;--party-subtitle:1.7rem;--party-kicker:1.15rem;--party-list-title:2rem;--party-list-meta:1.1rem;--party-list-value:1.4rem;--party-stat:3.15rem;--party-stat-label:1.05rem}
+#screenMode[data-scale="1440"]{--party-title:5rem;--party-subtitle:2rem;--party-kicker:1.3rem;--party-list-title:2.35rem;--party-list-meta:1.3rem;--party-list-value:1.65rem;--party-stat:3.7rem;--party-stat-label:1.25rem}
+#screenMode[data-scale="2160"]{--party-title:5.8rem;--party-subtitle:2.3rem;--party-kicker:1.5rem;--party-list-title:2.7rem;--party-list-meta:1.5rem;--party-list-value:1.85rem;--party-stat:4.3rem;--party-stat-label:1.45rem}
+#screenMode #screenScene h2,#screenMode .party-title{font-size:calc(var(--party-title)*var(--party-fine-scale));line-height:1.04;letter-spacing:-.02em;max-width:90%;margin-left:auto;margin-right:auto;text-wrap:balance;overflow-wrap:break-word}
+#screenMode .party-subtitle,#screenMode #screenScene p{font-size:calc(var(--party-subtitle)*var(--party-fine-scale));line-height:1.26}
+#screenMode .party-kicker{font-size:calc(var(--party-kicker)*var(--party-fine-scale))}
+#screenMode .party-list-copy b{font-size:calc(var(--party-list-title)*var(--party-fine-scale));line-height:1.08}
+#screenMode .party-list-copy small{font-size:calc(var(--party-list-meta)*var(--party-fine-scale))}
+#screenMode .party-list-value{font-size:calc(var(--party-list-value)*var(--party-fine-scale))}
+#screenMode .party-stat b{font-size:calc(var(--party-stat)*var(--party-fine-scale))}
+#screenMode .party-stat small{font-size:calc(var(--party-stat-label)*var(--party-fine-scale))}
+#screenMode .screen-scale-controls{display:inline-flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid rgba(255,255,255,.13);border-radius:12px;background:rgba(5,2,11,.5)}
+#screenMode .screen-scale-controls label{font-size:.72rem;font-weight:900;color:#ddd6fe;white-space:nowrap}
+#screenMode .screen-scale-controls select{max-width:104px;min-height:34px;border:1px solid rgba(255,255,255,.16);border-radius:9px;background:#120a23;color:#fff;font-weight:800}
+#screenMode .screen-scale-controls button{min-width:38px;padding:7px 9px}
+#screenMode .screen-scale-controls output{min-width:42px;text-align:center;font-size:.78rem;font-weight:900;color:#fff}
+@media(max-width:900px){#screenMode .screen-scale-controls label,#screenMode .screen-scale-controls output{display:none}#screenMode .screen-scale-controls select{max-width:88px}}
