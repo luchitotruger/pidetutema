@@ -1545,3 +1545,10 @@ if(el.toggleSummary)el.toggleSummary.onclick=()=>{const hidden=el.summaryContent
 el.loginForm.onsubmit=async e=>{e.preventDefault();el.loginButton.disabled=true;el.loginNotice.textContent='Validando acceso…';const {data,error}=await db.auth.signInWithPassword({email:el.loginEmail.value.trim(),password:el.loginPassword.value});el.loginButton.disabled=false;if(error){el.loginNotice.textContent='Correo o contraseña incorrectos.';return}session=data.session;el.loginForm.reset();el.loginNotice.textContent='';await openDj()};
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();mobileExperience.deferredInstall=e;el.installPwaButton.hidden=false});el.installPwaButton.onclick=async()=>{if(!mobileExperience.deferredInstall)return;mobileExperience.deferredInstall.prompt();await mobileExperience.deferredInstall.userChoice;mobileExperience.deferredInstall=null;el.installPwaButton.hidden=true};bindAutoUpdate();
 el.applyAppUpdate?.addEventListener('click',reloadForUpdate);el.dismissAppUpdate?.addEventListener('click',()=>el.appUpdateBanner.hidden=true);window.matchMedia('(display-mode: standalone)').addEventListener?.('change',renderPushPlatformUx);window.addEventListener('pageshow',renderPushPlatformUx);window.addEventListener('online',recoverNetwork);window.addEventListener('offline',()=>setNetworkState('offline'));if(db)db.auth.onAuthStateChange((event,newSession)=>{session=newSession;if(event==='SIGNED_OUT')showGuest()});async function initializeApp(){if(db){const {data}=await db.auth.getSession();session=data.session||null}await load();const params=new URLSearchParams(location.search);if(params.get('modo')==='pantalla'){openScreenMode();return}if(session){await loadOwnedEvents();renderEventManager()}if(params.get('panel')==='dj'&&session)await openDj()}initializeApp();
+
+/* V5.48.2 BRIDGE EXPERIENCIAS MULTIMEDIA */
+window.PIDE_TU_TEMA_BRIDGE = {
+  getEventId: () => eventId,
+  getVisitorToken: () => visitorToken,
+  getGuestNickname: () => getGuestNickname()
+};
