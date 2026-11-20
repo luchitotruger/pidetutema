@@ -172,3 +172,45 @@
 #screenMode .screen-scale-controls button{min-width:38px;padding:7px 9px}
 #screenMode .screen-scale-controls output{min-width:42px;text-align:center;font-size:.78rem;font-weight:900;color:#fff}
 @media(max-width:900px){#screenMode .screen-scale-controls label,#screenMode .screen-scale-controls output{display:none}#screenMode .screen-scale-controls select{max-width:88px}}
+
+/* V5.47.2.2 AJUSTE CARRUSEL COMPACTO */
+
+/* Título de escenas Top / Ranking */
+#screenMode #screenScene .party-title {
+  font-size: calc(3.4rem * var(--party-fine-scale));
+  line-height: 1.05;
+  max-width: 88%;
+}
+
+/* Nombre canción / participante */
+#screenMode .party-list-copy b {
+  font-size: calc(1.65rem * var(--party-fine-scale));
+  line-height: 1.08;
+}
+
+/* Artista / estadísticas secundarias */
+#screenMode .party-list-copy small {
+  font-size: calc(0.95rem * var(--party-fine-scale));
+  line-height: 1.15;
+}
+
+/* Votos / puntos */
+#screenMode .party-list-value {
+  font-size: calc(1.15rem * var(--party-fine-scale));
+}
+
+/* Medallas */
+#screenMode .party-list-rank {
+  font-size: calc(2.5rem * var(--party-fine-scale));
+}
+
+/* Filas más compactas */
+#screenMode .party-list-row {
+  padding: clamp(12px, 1.3vw, 20px);
+  gap: clamp(12px, 1.4vw, 22px);
+}
+
+/* Menos ancho para facilitar lectura */
+#screenMode .party-list {
+  width: min(1050px, 88vw);
+}
